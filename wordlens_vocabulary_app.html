@@ -1,0 +1,3822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WordLens — Catatan Leksikon & Katalog Pustaka Capybara</title>
+
+  <!-- Google Fonts: Newsreader (Editorial Serif), Plus Jakarta Sans (Clean UI), JetBrains Mono (Catalog Metadata) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React 18 & Babel CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            linen: '#F5F2EB',
+            parchment: '#FCFBF7',
+            stoneDesk: '#E8E3D9',
+            espresso: '#221E1C',
+            umber: '#605851',
+            sage: '#4A5D4E',
+            sageLight: '#E4ECE5',
+            riverSlate: '#475863',
+            slateLight: '#E3EAEF',
+            terracotta: '#8F5343',
+            brass: '#9E7B4F',
+            nightDesk: '#151311',
+            nightCard: '#1E1B18',
+            nightBorder: '#312C27'
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', ' Cambria', 'serif'],
+            sans: ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          },
+          boxShadow: {
+            'archival': '0 4px 20px -2px rgba(34, 30, 28, 0.06), 0 1px 4px -1px rgba(34, 30, 28, 0.04)',
+            'index-card': '0 8px 24px -4px rgba(34, 30, 28, 0.08), 0 2px 6px -1px rgba(34, 30, 28, 0.05)',
+            'tactile': '0 2px 0 0 #221E1C'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #F5F2EB;
+      color: #221E1C;
+      overflow-x: hidden;
+    }
+
+    .font-serif-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+
+    /* Subtle tactile button response (Calm, measured, non-cartoonish) */
+    .btn-tactile {
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+    }
+    .btn-tactile:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+    .btn-tactile:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    /* 3D Library Index Card Flip */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 14px;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Ruled lines for authentic Library Index Card feel */
+    .ruled-card-bg {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 27px,
+        rgba(158, 123, 79, 0.12) 28px
+      );
+    }
+    .dark .ruled-card-bg {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 27px,
+        rgba(200, 169, 126, 0.08) 28px
+      );
+    }
+
+    @keyframes subtleSteam {
+      0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.55; }
+      50% { transform: translateY(-4px) translateX(2px); opacity: 0.85; }
+    }
+    @keyframes lensScan {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      50% { transform: translate(-3px, -2px) rotate(-5deg); }
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes capyPlayfulIdle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-2.5px); }
+    }
+    @keyframes orangeIdleBob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-3.5px) rotate(2deg); }
+    }
+    @keyframes capyHappyJump {
+      0% { transform: translateY(0) scale(1, 1); }
+      20% { transform: translateY(3px) scale(1.06, 0.93); }
+      45% { transform: translateY(-14px) scale(0.96, 1.05) rotate(-2deg); }
+      70% { transform: translateY(2px) scale(1.03, 0.97); }
+      85% { transform: translateY(-4px) scale(0.99, 1.01); }
+      100% { transform: translateY(0) scale(1, 1); }
+    }
+    @keyframes orangeHighBounce {
+      0% { transform: translateY(0) rotate(0deg); }
+      20% { transform: translateY(3px) rotate(-4deg); }
+      50% { transform: translateY(-28px) rotate(14deg) scale(1.08); }
+      75% { transform: translateY(1px) rotate(-6deg) scale(1.04, 0.92); }
+      90% { transform: translateY(-8px) rotate(4deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+    @keyframes zzzFloat {
+      0%, 100% { transform: translateY(0px); opacity: 0.75; }
+      50% { transform: translateY(-3px); opacity: 1; }
+    }
+
+    .animate-steam {
+      animation: subtleSteam 3.2s ease-in-out infinite;
+    }
+    .animate-lens-scan {
+      animation: lensScan 1.8s ease-in-out infinite;
+      transform-origin: center center;
+    }
+    .animate-fade-slide {
+      animation: fadeSlide 0.25s ease-out forwards;
+    }
+    .animate-capy-idle {
+      animation: capyPlayfulIdle 2.6s ease-in-out infinite;
+    }
+    .animate-orange-idle {
+      animation: orangeIdleBob 2.6s ease-in-out infinite;
+    }
+    .animate-capy-jump {
+      animation: capyHappyJump 0.68s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .animate-orange-jump {
+      animation: orangeHighBounce 0.68s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .animate-zzz {
+      animation: zzzFloat 2.8s ease-in-out infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(96, 88, 81, 0.08);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(96, 88, 81, 0.28);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(96, 88, 81, 0.45);
+    }
+  </style>
+</head>
+
+<body class="bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] antialiased transition-colors duration-300 min-h-screen selection:bg-sage selection:text-white">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+    // ============================================================================
+    // 1. SAFE STORAGE WRAPPER & ARCHIVAL TACTILE AUDIO (Typewriter & Page Rustle)
+    // ============================================================================
+    const memoryStorage = {};
+
+    const SafeStorage = {
+      get(key, fallbackValue) {
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            const raw = window.localStorage.getItem(key);
+            if (raw !== null) {
+              return JSON.parse(raw);
+            }
+          }
+        } catch (err) {
+          // Fall back to in-memory storage if localStorage is blocked
+        }
+        return key in memoryStorage ? memoryStorage[key] : fallbackValue;
+      },
+      set(key, value) {
+        memoryStorage[key] = value;
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem(key, JSON.stringify(value));
+          }
+        } catch (err) {
+          // Ignore storage write errors
+        }
+      }
+    };
+
+    // Subtle mechanical typewriter key & archival stamp audio (No cartoon pop)
+    const ArchivalAudio = {
+      ctx: null,
+      getContext() {
+        if (typeof window === "undefined") return null;
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      },
+      playKeyClick(enabled = true) {
+        if (!enabled) return;
+        try {
+          const ctx = this.getContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(190, now);
+          osc.frequency.exponentialRampToValueAtTime(95, now + 0.035);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.045);
+        } catch (err) {
+          // Ignore audio errors
+        }
+      },
+      playBellChord(enabled = true) {
+        if (!enabled) return;
+        try {
+          const ctx = this.getContext();
+          if (!ctx) return;
+          // Warm acoustic desk bell interval (A4 + E5)
+          [440, 659.25].forEach((freq, idx) => {
+            const start = ctx.currentTime + idx * 0.09;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.055, start);
+            gain.gain.exponentialRampToValueAtTime(0.0008, start + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.46);
+          });
+        } catch (err) {
+          // Ignore audio errors
+        }
+      }
+    };
+
+    // ============================================================================
+    // 2. ISOLATED MOCK DATA (10 Realistic Entries with Archival Catalog Numbers)
+    // ============================================================================
+    const MOCK_WORDS = {
+      "run": {
+        word: "run",
+        phonetic: "/rʌn/",
+        catalogNo: "WL-001",
+        tier: 1,
+        meanings: [
+          {
+            partOfSpeech: "verb",
+            translation: "berlari",
+            definition: "To move swiftly on foot at a speed faster than walking.",
+            context: "Physical Movement & Sports",
+            examples: [
+              {
+                en: "She likes to run around the park every morning.",
+                id: "Dia suka berlari mengelilingi taman setiap pagi."
+              },
+              {
+                en: "We had to run to catch the last train home.",
+                id: "Kami harus berlari untuk mengejar kereta terakhir pulang."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "verb",
+            translation: "mengelola / menjalankan",
+            definition: "To be in charge of, manage, or direct a business, organization, or project.",
+            context: "Business & Management",
+            examples: [
+              {
+                en: "He helps his parents run a small coffee shop in Bandung.",
+                id: "Dia membantu orang tuanya mengelola kedai kopi kecil di Bandung."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "verb",
+            translation: "beroperasi / berjalan (program/mesin)",
+            definition: "To function, operate, or execute continuously as a machine or computer program.",
+            context: "Technology & Machinery",
+            examples: [
+              {
+                en: "This application can run smoothly in any modern browser.",
+                id: "Aplikasi ini dapat berjalan lancar di peramban modern mana pun."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "noun",
+            translation: "lari / sesi olahraga lari",
+            definition: "An act or spell of running for exercise or leisure.",
+            context: "Fitness & Daily Routine",
+            examples: [
+              {
+                en: "Let's go for a quick run before dinner.",
+                id: "Mari kita pergi lari sebentar sebelum makan malam."
+              }
+            ]
+          }
+        ]
+      },
+      "light": {
+        word: "light",
+        phonetic: "/laɪt/",
+        catalogNo: "WL-002",
+        tier: 1,
+        meanings: [
+          {
+            partOfSpeech: "noun",
+            translation: "cahaya / lampu",
+            definition: "The natural agent that stimulates sight and makes things visible, or an electric lamp.",
+            context: "Physics & Everyday Objects",
+            examples: [
+              {
+                en: "Please turn off the light before leaving the room.",
+                id: "Tolong matikan lampu sebelum meninggalkan ruangan."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "adjective",
+            translation: "ringan",
+            definition: "Of little weight; not heavy and easy to lift or carry.",
+            context: "Weight & Physical Properties",
+            examples: [
+              {
+                en: "This laptop is very light and easy to carry everywhere.",
+                id: "Laptop ini sangat ringan dan mudah dibawa ke mana saja."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "adjective",
+            translation: "muda / terang (warna)",
+            definition: "Pale or having a considerable amount of white; not dark in shade.",
+            context: "Colors & Appearance",
+            examples: [
+              {
+                en: "He wore a light blue shirt to the interview.",
+                id: "Dia mengenakan kemeja biru muda ke wawancara tersebut."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "verb",
+            translation: "menyalakan",
+            definition: "To make something start burning or shine with fire or electricity.",
+            context: "Daily Actions",
+            examples: [
+              {
+                en: "We decided to light a candle during the power outage.",
+                id: "Kami memutuskan untuk menyalakan lilin saat listrik padam."
+              }
+            ]
+          }
+        ]
+      },
+      "break": {
+        word: "break",
+        phonetic: "/breɪk/",
+        catalogNo: "WL-003",
+        tier: 2,
+        meanings: [
+          {
+            partOfSpeech: "verb",
+            translation: "memecahkan / merusak",
+            definition: "To separate into pieces as a result of a blow, shock, or strain.",
+            context: "Physical Action",
+            examples: [
+              {
+                en: "Be careful not to break the glass vase.",
+                id: "Hati-hati jangan sampai memecahkan vas kaca itu."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "noun",
+            translation: "istirahat / jeda",
+            definition: "A pause in work or during an activity or event.",
+            context: "Work & Study",
+            examples: [
+              {
+                en: "Let's take a fifteen-minute coffee break.",
+                id: "Mari kita ambil istirahat minum kopi selama lima belas menit."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "verb",
+            translation: "melanggar (aturan/janji)",
+            definition: "To fail to observe a law, regulation, agreement, or promise.",
+            context: "Law & Ethics",
+            examples: [
+              {
+                en: "She promised she would never break the rules.",
+                id: "Dia berjanji tidak akan pernah melanggar aturan."
+              }
+            ]
+          }
+        ]
+      },
+      "break the ice": {
+        word: "break the ice",
+        phonetic: "/breɪk ðə aɪs/",
+        catalogNo: "WL-004",
+        tier: 3,
+        meanings: [
+          {
+            partOfSpeech: "idiom",
+            translation: "mencairkan suasana",
+            definition: "To do or say something to relieve tension or awkwardness when people meet for the first time.",
+            context: "Social Interaction & Meetings",
+            examples: [
+              {
+                en: "The teacher told a funny story to break the ice on the first day of class.",
+                id: "Guru itu menceritakan kisah lucu untuk mencairkan suasana di hari pertama kelas."
+              },
+              {
+                en: "Asking about hobbies is a great way to break the ice.",
+                id: "Menanyakan tentang hobi adalah cara yang bagus untuk mencairkan suasana."
+              }
+            ]
+          }
+        ]
+      },
+      "give up": {
+        word: "give up",
+        phonetic: "/ɡɪv ʌp/",
+        catalogNo: "WL-005",
+        tier: 2,
+        meanings: [
+          {
+            partOfSpeech: "phrasal verb",
+            translation: "menyerah",
+            definition: "To cease making an effort; to admit defeat and stop trying to do something.",
+            context: "Perseverance & Motivation",
+            examples: [
+              {
+                en: "Even when learning grammar feels hard, don't give up.",
+                id: "Bahkan ketika belajar tata bahasa terasa sulit, jangan menyerah."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "phrasal verb",
+            translation: "berhenti (kebiasaan)",
+            definition: "To stop doing, consuming, or having something habitual.",
+            context: "Health & Habits",
+            examples: [
+              {
+                en: "He decided to give up sugary drinks for a month.",
+                id: "Dia memutuskan untuk berhenti minum minuman manis selama sebulan."
+              }
+            ]
+          }
+        ]
+      },
+      "bright": {
+        word: "bright",
+        phonetic: "/braɪt/",
+        catalogNo: "WL-006",
+        tier: 1,
+        meanings: [
+          {
+            partOfSpeech: "adjective",
+            translation: "cerah / terang",
+            definition: "Giving out or reflecting a lot of light; shining strongly.",
+            context: "Weather & Light",
+            examples: [
+              {
+                en: "We woke up to a bright and sunny morning.",
+                id: "Kami bangun di pagi hari yang cerah dan bersinar."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "adjective",
+            translation: "cerdas / pintar",
+            definition: "Quick-witted, intelligent, and quick to learn new concepts.",
+            context: "Education & Character",
+            examples: [
+              {
+                en: "She is one of the brightest students in the department.",
+                id: "Dia adalah salah satu mahasiswa paling cerdas di jurusan tersebut."
+              }
+            ]
+          }
+        ]
+      },
+      "look after": {
+        word: "look after",
+        phonetic: "/lʊk ˈæftər/",
+        catalogNo: "WL-007",
+        tier: 2,
+        meanings: [
+          {
+            partOfSpeech: "phrasal verb",
+            translation: "merawat / menjaga",
+            definition: "To take care of someone or something and make sure they are safe and well.",
+            context: "Family & Responsibility",
+            examples: [
+              {
+                en: "Could you look after my cat while I'm away this weekend?",
+                id: "Bisakah kamu menjaga kucingku saat aku pergi akhir pekan ini?"
+              }
+            ]
+          }
+        ]
+      },
+      "piece of cake": {
+        word: "piece of cake",
+        phonetic: "/piːs əv keɪk/",
+        catalogNo: "WL-008",
+        tier: 3,
+        meanings: [
+          {
+            partOfSpeech: "idiom",
+            translation: "sangat mudah / gampang sekali",
+            definition: "Something that is very easy to accomplish or complete effortlessly.",
+            context: "Informal Conversation & Exams",
+            examples: [
+              {
+                en: "After studying all week, the vocabulary test was a piece of cake.",
+                id: "Setelah belajar sepanjang minggu, ujian kosakata itu terasa sangat mudah."
+              }
+            ]
+          }
+        ]
+      },
+      "resilient": {
+        word: "resilient",
+        phonetic: "/rɪˈzɪliənt/",
+        catalogNo: "WL-009",
+        tier: 3,
+        meanings: [
+          {
+            partOfSpeech: "adjective",
+            translation: "tangguh / cepat pulih",
+            definition: "Able to withstand or recover quickly from difficult conditions or setbacks.",
+            context: "Psychology & Character",
+            examples: [
+              {
+                en: "Local communities proved resilient after the economic crisis.",
+                id: "Masyarakat lokal terbukti tangguh setelah krisis ekonomi tersebut."
+              }
+            ]
+          }
+        ]
+      },
+      "train": {
+        word: "train",
+        phonetic: "/treɪn/",
+        catalogNo: "WL-010",
+        tier: 1,
+        meanings: [
+          {
+            partOfSpeech: "noun",
+            translation: "kereta api",
+            definition: "A series of connected railway carriages or wagons moved by a locomotive.",
+            context: "Transportation & Travel",
+            examples: [
+              {
+                en: "The high-speed train arrives at the station at 8:00 AM.",
+                id: "Kereta api cepat tiba di stasiun pada pukul 08.00 pagi."
+              }
+            ]
+          },
+          {
+            partOfSpeech: "verb",
+            translation: "melatih / berlatih",
+            definition: "To teach a person or animal a particular skill or type of behavior through practice.",
+            context: "Sports & Professional Development",
+            examples: [
+              {
+                en: "Athletes train for months before competing in the tournament.",
+                id: "Para atlet berlatih selama berbulan-bulan sebelum bertanding di turnamen."
+              }
+            ]
+          }
+        ]
+      }
+    };
+
+    // ============================================================================
+    // 3. ISOLATED ASYNC SEARCH FUNCTION (~800ms delay) & TOLERANT RECOMMENDATIONS
+    // ============================================================================
+    function computeEditDistance(a, b) {
+      const m = a.length;
+      const n = b.length;
+      const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,
+            dp[i][j - 1] + 1,
+            dp[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return dp[m][n];
+    }
+
+    function getSimilarWords(rawQuery) {
+      const q = (rawQuery || "").trim().toLowerCase();
+      const allKeys = Object.keys(MOCK_WORDS);
+      if (!q) return allKeys.slice(0, 5);
+
+      const scored = allKeys.map((key) => {
+        const entry = MOCK_WORDS[key];
+        let score = 0;
+        if (key.includes(q) || q.includes(key)) score += 60;
+        if (key.startsWith(q.slice(0, 2))) score += 25;
+
+        const tokens = key.split(/\s+/);
+        if (tokens.some((t) => t.startsWith(q) || q.startsWith(t))) score += 40;
+
+        entry.meanings.forEach((m) => {
+          if (m.translation.toLowerCase().includes(q)) score += 55;
+          if (m.definition.toLowerCase().includes(q)) score += 20;
+          if (m.context && m.context.toLowerCase().includes(q)) score += 15;
+        });
+
+        const dist = computeEditDistance(q, key);
+        score += Math.max(0, 35 - dist * 10);
+
+        return { key, score, mainTranslation: entry.meanings[0]?.translation || "" };
+      });
+
+      return scored.sort((a, b) => b.score - a.score).slice(0, 4);
+    }
+
+    async function searchWord(query) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const normalized = (query || "").trim().toLowerCase();
+      if (!normalized) return null;
+      if (MOCK_WORDS[normalized]) return MOCK_WORDS[normalized];
+
+      const reverseMatch = Object.values(MOCK_WORDS).find((entry) =>
+        entry.meanings.some((m) =>
+          m.translation.toLowerCase().includes(normalized)
+        )
+      );
+      return reverseMatch || null;
+    }
+
+    // ============================================================================
+    // 4. HELPER UTILITIES & MUTED BOTANICAL PART-OF-SPEECH STYLING
+    // ============================================================================
+    function createMeaningId(word, partOfSpeech, translation) {
+      return `${word}__${partOfSpeech}__${translation}`
+        .toLowerCase()
+        .replace(/\s+/g, "_");
+    }
+
+    function getLexiconTier(word, partOfSpeech) {
+      const entry = MOCK_WORDS[(word || "").toLowerCase()];
+      if (entry && entry.tier) return entry.tier;
+      const pos = (partOfSpeech || "").toLowerCase();
+      if (pos === "idiom") return 3;
+      if (pos === "phrasal verb") return 2;
+      return 1;
+    }
+
+    function getCatalogCode(word) {
+      const entry = MOCK_WORDS[(word || "").toLowerCase()];
+      return entry?.catalogNo || "WL-ARC";
+    }
+
+    // Muted, calm archival tags (Sage, Slate, Umber, Terracotta)
+    function getPosStyle(partOfSpeech) {
+      const pos = (partOfSpeech || "").toLowerCase();
+      switch (pos) {
+        case "verb":
+          return {
+            bg: "bg-[#E3EAEF]/70 dark:bg-[#232D34]",
+            text: "text-[#2E3F4A] dark:text-[#BFD1DF]",
+            border: "border-[#C5D3DD] dark:border-[#364652]",
+            dot: "bg-[#475863]"
+          };
+        case "noun":
+          return {
+            bg: "bg-[#E4ECE5]/70 dark:bg-[#222D24]",
+            text: "text-[#2F4233] dark:text-[#BBD0BF]",
+            border: "border-[#C4D5C7] dark:border-[#344638]",
+            dot: "bg-[#4A5D4E]"
+          };
+        case "adjective":
+          return {
+            bg: "bg-[#EFECE4] dark:bg-[#2B2620]",
+            text: "text-[#574631] dark:text-[#D9C7B0]",
+            border: "border-[#D8CEBE] dark:border-[#423A30]",
+            dot: "bg-[#9E7B4F]"
+          };
+        case "idiom":
+          return {
+            bg: "bg-[#F2E6E2] dark:bg-[#30221F]",
+            text: "text-[#68382B] dark:text-[#E2B7AB]",
+            border: "border-[#DEC5BD] dark:border-[#4A342F]",
+            dot: "bg-[#8F5343]"
+          };
+        case "phrasal verb":
+          return {
+            bg: "bg-[#EAE7EE] dark:bg-[#28242E]",
+            text: "text-[#493E56] dark:text-[#CCC2D9]",
+            border: "border-[#D1C9DB] dark:border-[#3D3746]",
+            dot: "bg-[#6A5B7B]"
+          };
+        default:
+          return {
+            bg: "bg-stoneDesk/60 dark:bg-zinc-800",
+            text: "text-espresso dark:text-zinc-300",
+            border: "border-stoneDesk dark:border-zinc-700",
+            dot: "bg-umber"
+          };
+      }
+    }
+
+    // Tier Indicator using Nib / Roman Numeral Stamp (Strictly NO fruit/orange icons)
+    function TierStampBadge({ tier = 1 }) {
+      const roman = { 1: "I", 2: "II", 3: "III" };
+      const labels = { 1: "Dasar", 2: "Kontekstual", 3: "Idiomatik" };
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-[11px] font-medium text-umber dark:text-[#B8AFA6]"
+          title={`Tingkat Leksikon ${roman[tier]}: ${labels[tier]}`}
+        >
+          <span className="text-brass dark:text-[#C8A97E] font-semibold">
+            TIER {roman[tier] || "I"}
+          </span>
+          <span className="opacity-40">•</span>
+          <span>{labels[tier] || "Dasar"}</span>
+        </span>
+      );
+    }
+
+    // ============================================================================
+    // 5. EDITORIAL SVG ICONS & SCHOLARLY CAPYBARA ILLUSTRATIONS (NO ORANGES)
+    // ============================================================================
+    const Icons = {
+      Search: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      ),
+      Speaker: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+      ),
+      Mic: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <line x1="12" y1="19" x2="12" y2="23" />
+          <line x1="8" y1="23" x2="16" y2="23" />
+        </svg>
+      ),
+      Bookmark: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
+      Check: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ),
+      Trash: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      ),
+      Sun: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+      ),
+      Moon: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      ),
+      ChevronLeft: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      ),
+      ChevronRight: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      ),
+      FlipCard: ({ className = "w-3.5 h-3.5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+      ),
+      SwitchDir: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 16V4M7 4L3 8M7 4L11 8" />
+          <path d="M17 8v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      )
+    };
+
+    /**
+     * ArchivistCapybara (Gambar 2):
+     * Standing playful capybara facing right with an orange on its head.
+     * When clicked (or celebrating), the capybara jumps happily with a cheerful expression
+     * and the orange on its head bounces high into the air.
+     */
+    function ArchivistCapybara({ state = "idle", mood = "scholar", onClick, className = "w-28 h-28" }) {
+      const [jumpTrigger, setJumpTrigger] = useState(false);
+      const isHappyJumping = jumpTrigger || state === "celebrating";
+
+      const handleClick = (e) => {
+        setJumpTrigger(false);
+        setTimeout(() => setJumpTrigger(true), 10);
+        setTimeout(() => setJumpTrigger(false), 720);
+        if (onClick) onClick(e);
+      };
+
+      return (
+        <div
+          onClick={handleClick}
+          className={`relative select-none cursor-pointer group ${className}`}
+          title="Kapi — Klik untuk melompat gembira!"
+        >
+          <svg
+            viewBox="0 0 160 150"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-full overflow-visible"
+          >
+            {/* Soft Lavender-Blue Floor Shadow (from Image 2) */}
+            <ellipse
+              cx="78"
+              cy="132"
+              rx="48"
+              ry="7.5"
+              fill="#D4DCFF"
+              className="dark:opacity-40 transition-transform duration-300"
+              style={{
+                transform: isHappyJumping ? "scaleX(0.82)" : "scaleX(1)",
+                transformOrigin: "78px 132px"
+              }}
+            />
+
+            {/* Main Capybara Body Group (Jumps when clicked, gentle bob when idle) */}
+            <g className={isHappyJumping ? "animate-capy-jump" : "animate-capy-idle"}>
+              {/* Back Left & Front Left Legs (Darker caramel shade) */}
+              <path
+                d="M52 110 L56 127 C57 130 67 130 66 126 L64 111 Z"
+                fill="#BD743A"
+              />
+              <path
+                d="M93 111 L96 126 C97 129 107 129 106 125 L103 109 Z"
+                fill="#BD743A"
+              />
+
+              {/* Back Right & Front Right Legs */}
+              <path
+                d="M34 112 L42 129 C44 132 56 132 55 128 L53 113 Z"
+                fill="#BD743A"
+              />
+              <path
+                d="M82 114 L87 129 C89 132 99 131 98 127 L95 112 Z"
+                fill="#BD743A"
+              />
+
+              {/* Plump Standing Capybara Body & Head (Warm Sandy Orange #EA9E5B) */}
+              <path
+                d="M32 76 C52 72 68 69 78 58 C84 51 89 45 99 45 C114 45 136 53 141 68 C144 79 143 93 135 97 C127 100 116 99 113 97 C115 106 111 115 103 120 C97 123 87 123 81 118 C72 111 67 112 53 116 C41 119 33 116 30 107 C26 95 26 78 32 76 Z"
+                fill="#EA9E5B"
+              />
+
+              {/* Darker Snout Patch on Right (#B97338) */}
+              <path
+                d="M121 77 C121 63 129 57 139 59 C143 66 144 86 137 96 C133 98 128 98 125 97 C122 91 121 84 121 77 Z"
+                fill="#B97338"
+              />
+
+              {/* Back Right Ear */}
+              <path
+                d="M113 44 C115 39 121 41 121 48 Z"
+                fill="#C87A3B"
+              />
+
+              {/* Main Left Ear & Inner Ear */}
+              <ellipse
+                cx="93"
+                cy="49"
+                rx="8"
+                ry="7.5"
+                transform="rotate(-15 93 49)"
+                fill="#B97137"
+              />
+              <path
+                d="M90 48 C93 50 96 52 97 54"
+                stroke="#36190B"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />
+
+              {/* Eye & Facial Expression (Playful Happy ^ when clicked vs Calm Closed Eye) */}
+              {isHappyJumping ? (
+                <g>
+                  {/* Happy Cheerful Curved Eye */}
+                  <path
+                    d="M106 65 C108 61 113 61 115 65"
+                    stroke="#36190B"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                  {/* Cute Rosy Blush */}
+                  <ellipse cx="109" cy="71" rx="4.5" ry="2.5" fill="#F08A76" opacity="0.65" />
+                </g>
+              ) : (
+                /* Calm Horizontal Oval Eye (from Image 2) */
+                <ellipse
+                  cx="111"
+                  cy="65"
+                  rx="4.8"
+                  ry="1.6"
+                  transform="rotate(4 111 65)"
+                  fill="#36190B"
+                />
+              )}
+
+              {/* Snout 'Y' Nose & Mouth Line */}
+              <path
+                d={
+                  isHappyJumping
+                    ? "M130 69 L134 74 L138 69 M134 74 L134 85 C134 89 129 92 126 90"
+                    : "M130 69 L134 74 L138 69 M134 74 L134 87 C134 90 131 93 129 94"
+                }
+                stroke="#36190B"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Clean Underbelly & Leg Crease Outlines (Body fur marks removed) */}
+              <path
+                d="M52 119 C52 116 57 114 64 112 M78 109 C80 112 82 114 85 115 M96 119 C99 115 103 111 106 109"
+                stroke="#36190B"
+                strokeWidth="2.1"
+                strokeLinecap="round"
+              />
+
+              {/* Top Head Line Under the Orange */}
+              <path
+                d="M101 45 C106 46 112 46 116 44"
+                stroke="#36190B"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </g>
+
+            {/* The Playful Orange on Top of Kapi's Head (Jumps higher when clicked!) */}
+            <g className={isHappyJumping ? "animate-orange-jump" : "animate-orange-idle"}>
+              {/* Orange Fruit Body */}
+              <path
+                d="M108 32 C102 31 97 34 97 40 C97 45 102 46 108 46 C114 46 118 45 118 40 C118 34 113 31 108 32 Z"
+                fill="#FFA31A"
+              />
+              {/* Stem & Green Leaf */}
+              <path
+                d="M107 32 C106 29 105 27 104 26"
+                stroke="#2E6F40"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <path
+                d="M106 29 C108 25 113 24 114 27 C114 29 110 31 106 29 Z"
+                fill="#388E4A"
+              />
+            </g>
+          </svg>
+        </div>
+      );
+    }
+
+    /**
+     * SleepingBookCapybara (Gambar 3):
+     * Capybara sleeping peacefully on an open book with floating "Zzz" letters,
+     * used in the "Ruang Uji Ingatan" setup & empty states.
+     */
+    function SleepingBookCapybara({ className = "w-28 h-28" }) {
+      return (
+        <div className={`relative select-none flex items-center justify-center ${className}`}>
+          <svg
+            viewBox="0 0 220 200"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-full overflow-visible"
+          >
+            {/* Floating Zzz Letters */}
+            <g className="animate-zzz">
+              <path
+                d="M18 54 L31 49 L22 72 L36 67"
+                stroke="#3B2314"
+                strokeWidth="4.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M46 37 L58 34 L50 52 L63 48"
+                stroke="#3B2314"
+                strokeWidth="3.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M73 26 L83 25 L76 38 L86 37"
+                stroke="#3B2314"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+
+            {/* Open Book Base Cover (Soft Blue-Grey Spine & Edges) */}
+            <path
+              d="M12 150 L54 157 L106 177 L156 154 L96 135 Z"
+              fill="#8FA6C4"
+            />
+            {/* Open Book Cream Pages */}
+            <path
+              d="M16 146 C34 144 48 148 56 155 C74 147 94 149 107 171 L153 150 L102 128 C84 126 68 131 56 138 C44 132 30 131 16 135 Z"
+              fill="#FBF6EA"
+              stroke="#4A2E1B"
+              strokeWidth="2.4"
+              strokeLinejoin="round"
+            />
+            {/* Book Page Layer Lines */}
+            <path
+              d="M16 141 C34 140 48 144 56 151 C73 144 92 146 106 165 L149 146"
+              stroke="#4A2E1B"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M56 155 C53 158 56 161 60 159"
+              stroke="#4A2E1B"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+
+            {/* Back Left Ear */}
+            <path
+              d="M74 73 C68 61 73 53 81 56 C86 58 88 64 87 70 Z"
+              fill="#D9A16C"
+            />
+
+            {/* Main Sleeping Capybara Body (Warm Tan #D9A16C) */}
+            <path
+              d="M34 103 C38 86 56 74 78 70 C92 67 104 68 117 72 C136 64 166 64 188 79 C207 93 213 118 205 142 C199 152 184 156 166 156 C144 156 121 153 96 147 C74 142 46 141 37 132 C31 124 31 112 34 103 Z"
+              fill="#D9A16C"
+            />
+
+            {/* Darker Brown Snout Patch (#8C5E3C) */}
+            <path
+              d="M34 103 C39 94 50 94 56 104 C62 114 64 128 60 137 C49 139 39 136 35 127 C31 119 31 110 34 103 Z"
+              fill="#8C5E3C"
+            />
+
+            {/* Snout Heart Nose & Mouth Line */}
+            <path
+              d="M35 106 C38 108 40 109 41 112 C42 109 44 106 47 104"
+              stroke="#3B2314"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M41 112 L46 131 C48 134 53 135 56 132"
+              stroke="#3B2314"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+
+            {/* Sleeping Closed Eye & Soft Pink Cheek Blush */}
+            <path
+              d="M74 91 C78 96 84 96 89 90"
+              stroke="#3B2314"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <ellipse
+              cx="81"
+              cy="106"
+              rx="9"
+              ry="5.5"
+              transform="rotate(-8 81 106)"
+              fill="#F3B8AD"
+              opacity="0.85"
+            />
+
+            {/* Front Right Ear & Inner Ear */}
+            <path
+              d="M96 72 C96 59 105 55 111 60 C115 64 113 72 108 76"
+              fill="#D9A16C"
+            />
+            <path
+              d="M99 73 C99 63 105 60 109 63 C111 66 109 72 105 75 Z"
+              fill="#9E6E49"
+            />
+            <path
+              d="M75 72 C84 69 93 68 100 69 M109 71 C114 73 118 76 121 79"
+              stroke="#3B2314"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+            />
+
+            {/* Front Arm & Dark Brown Paw Resting on Book */}
+            <path
+              d="M123 115 C121 122 118 127 114 130 C105 129 96 131 90 135 L103 148 C117 150 134 148 143 136"
+              fill="#D9A16C"
+            />
+            <path
+              d="M96 131 C86 134 79 140 80 144 C81 147 85 147 88 146 C87 149 91 151 95 149 C96 151 101 151 104 148 L113 139 C108 134 102 132 96 131 Z"
+              fill="#8C5E3C"
+            />
+            <path
+              d="M123 115 C121 122 118 127 114 130 M95 130 C106 128 117 128 126 131 M116 146 C128 149 138 144 144 134"
+              stroke="#3B2314"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+
+            {/* Hind Leg Curve & Dark Brown Back Foot */}
+            <path
+              d="M152 146 C149 149 151 154 155 154 C155 157 160 159 164 157 C166 160 172 160 176 157 L203 144 C188 146 168 145 152 146 Z"
+              fill="#8C5E3C"
+            />
+            <path
+              d="M178 96 C159 99 149 116 156 136 C160 143 169 146 179 145"
+              stroke="#3B2314"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              fill="none"
+            />
+
+            {/* Subtle Fur Dashes on Back */}
+            <path
+              d="M132 72 L138 71 M148 70 L154 71 M129 82 L135 83 M168 79 L174 81 M184 86 L189 89 M168 92 L173 94 M192 108 L195 113 M162 124 L167 127"
+              stroke="#9E6E49"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      );
+    }
+
+    /**
+     * ReadingBookCapybara (Gambar 4 - 100% Exact Match):
+     * Used in "Ruang Evaluasi" / active quiz & summary.
+     * Renders the exact provided image with a 1:1 pixel-traced 507x449 vector fallback.
+     */
+    function ReadingBookCapybara({ className = "w-28 h-28" }) {
+      const [imgFailed, setImgFailed] = useState(false);
+
+      return (
+        <div className={`relative select-none flex items-center justify-center ${className}`}>
+          {!imgFailed ? (
+            <img
+              src="Gemini_Generated_Image_o10ie7o10ie7o10i-removebg-preview.png"
+              alt="Capybara membaca buku"
+              onError={() => setImgFailed(true)}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <svg
+              viewBox="0 0 507 449"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-full h-full overflow-visible"
+            >
+              {/* Back Left Ear */}
+              <path
+                d="M223 47 C229 27 245 17 256 19 C265 21 266 32 263 42 Z"
+                fill="#744B32"
+                stroke="#0B0908"
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Main Capybara Body Base (#EA9B56) */}
+              <path
+                d="M166 82 C180 65 204 51 223 47 C248 41 276 41 301 47 C315 51 329 59 337 70 C368 118 399 182 417 250 C427 291 427 336 414 369 C401 401 373 414 320 415 C265 418 214 416 184 409 C159 390 151 356 156 325 C150 250 145 135 166 82 Z"
+                fill="#EA9B56"
+              />
+
+              {/* Body Shading: Under Chin, Chest, Belly & Inner Back Crescent (#C97E43) */}
+              <path
+                d="M166 205 C212 212 268 205 299 187 C305 206 303 226 289 246 L266 257 L278 307 C295 307 316 302 332 294 C338 318 336 340 326 351 C303 349 286 367 278 396 L256 415 C224 415 198 412 184 409 C160 390 154 358 158 332 Z"
+                fill="#C97E43"
+              />
+              {/* Right Rump / Back Shading Crescent */}
+              <path
+                d="M401 198 C417 265 415 335 388 377 C372 399 348 409 320 415 C364 414 398 402 414 369 C427 336 427 291 417 250 C412 232 407 215 401 198 Z"
+                fill="#C97E43"
+              />
+
+              {/* Dark Brown Snout Patch (#915F40) */}
+              <path
+                d="M146 128 C149 109 165 98 184 103 C213 111 229 144 229 179 C229 194 226 205 219 212 C196 222 171 224 152 208 C140 192 138 156 146 128 Z"
+                fill="#915F40"
+              />
+
+              {/* Head & Body Outer Black Stroke */}
+              <path
+                d="M166 82 C180 65 204 51 223 47 C248 41 276 41 301 47 M337 70 C368 118 399 182 417 250 C427 291 427 336 414 369 C401 401 373 414 320 415 M146 128 C139 156 140 189 152 208 M158 332 C156 355 162 385 184 409"
+                stroke="#0B0908"
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Right Ear (Outer Rim & Dark Inner Ear) */}
+              <path
+                d="M297 63 C301 41 317 22 335 23 C349 24 355 40 347 57 C342 67 331 73 321 74"
+                fill="#EA9B56"
+                stroke="#0B0908"
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M312 65 C315 46 327 34 340 36 C348 37 350 48 344 58 C339 66 330 71 321 72 Z"
+                fill="#744B32"
+              />
+              <path
+                d="M312 65 C315 46 327 34 340 36"
+                stroke="#0B0908"
+                strokeWidth="7.5"
+                strokeLinecap="round"
+              />
+
+              {/* Nostrils & Mouth */}
+              <path
+                d="M148 142 C153 144 156 148 156 153 M189 141 C182 142 177 146 176 152 M164 159 L167 193 M156 204 L167 193 L179 201"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Under-Chin Crease Line */}
+              <path
+                d="M255 212 C264 210 272 207 277 204"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+              />
+
+              {/* Serious Focused Eye (Right of Glasses) */}
+              <path
+                d="M258 96 L279 90 C280 99 275 106 266 106 C260 106 257 101 258 96 Z"
+                fill="#0B0908"
+              />
+              <path
+                d="M254 97 L283 88"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+              />
+
+              {/* Left Eyeglass Lens (with Snout Overlap & White Reflection) */}
+              <g>
+                <circle cx="154" cy="104" r="26" fill="#E8F3F8" />
+                {/* Snout visible through lower-right of left lens */}
+                <path
+                  d="M150 130 C166 130 179 118 180 102 C166 102 154 113 150 130 Z"
+                  fill="#B89B87"
+                />
+                {/* Crisp white lens highlight */}
+                <path
+                  d="M142 82 L169 124 L158 128 L133 89 Z"
+                  fill="#FFFFFF"
+                />
+                <circle
+                  cx="154"
+                  cy="104"
+                  r="26"
+                  stroke="#0B0908"
+                  strokeWidth="8.5"
+                />
+              </g>
+
+              {/* Right Eyeglass Lens (Warm Tint + Snout Overlap + Twin White Shine Stripes) */}
+              <g>
+                <circle cx="216" cy="109" r="26" fill="#F6DEC0" />
+                {/* Snout overlap on bottom-left of right lens */}
+                <path
+                  d="M190 109 C190 123 201 134 215 135 C215 119 205 108 190 109 Z"
+                  fill="#C19676"
+                />
+                {/* Diagonal White Reflection Stripes */}
+                <line
+                  x1="203"
+                  y1="89"
+                  x2="230"
+                  y2="128"
+                  stroke="#FFFFFF"
+                  strokeWidth="9"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="215"
+                  y1="87"
+                  x2="237"
+                  y2="119"
+                  stroke="#FFFFFF"
+                  strokeWidth="4.5"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="216"
+                  cy="109"
+                  r="26"
+                  stroke="#0B0908"
+                  strokeWidth="8.5"
+                />
+              </g>
+
+              {/* Glasses Bridge */}
+              <path
+                d="M179 102 C183 100 187 100 191 103"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+              />
+
+              {/* Open Book: White Top Pages Spread */}
+              <path
+                d="M84 205 C109 201 135 212 150 232 C173 213 211 203 244 206 L257 212 L166 241 L147 241 Z"
+                fill="#FFFFFF"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinejoin="round"
+              />
+              {/* Inner Page Crease Lines */}
+              <path
+                d="M102 209 C121 213 138 221 150 232 C177 219 212 212 245 212"
+                stroke="#0B0908"
+                strokeWidth="6.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Open Book: Powder-Blue Hardcover (#A7C9D9) */}
+              <path
+                d="M87 210 L147 241 L166 241 L257 212 L285 319 L181 346 C173 350 165 349 160 342 L125 319 Z"
+                fill="#A7C9D9"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinejoin="round"
+              />
+              {/* Book Spine Vertical Lines */}
+              <line
+                x1="147"
+                y1="241"
+                x2="160"
+                y2="342"
+                stroke="#0B0908"
+                strokeWidth="8"
+                strokeLinecap="round"
+              />
+              <line
+                x1="166"
+                y1="241"
+                x2="181"
+                y2="346"
+                stroke="#0B0908"
+                strokeWidth="8"
+                strokeLinecap="round"
+              />
+
+              {/* Left Paw Gripping Left Edge of Book */}
+              <path
+                d="M111 253 C95 251 89 265 101 272 C90 276 92 291 105 292 C99 299 106 309 121 303 L111 253 Z"
+                fill="#825539"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Right Arm & Brown Paw Gripping Right Edge of Book */}
+              <path
+                d="M306 238 C293 249 278 256 263 257 C242 255 232 260 233 268 C234 272 242 273 250 273 C232 274 225 280 229 288 C232 292 241 292 249 291 C236 294 233 302 241 307 C254 311 292 311 352 286 Z"
+                fill="#EA9B56"
+              />
+              {/* Brown Paw Tips on Right Hand */}
+              <path
+                d="M277 255 C258 256 233 257 233 268 C234 272 242 273 250 273 C232 274 225 280 229 288 C232 292 241 292 249 291 C236 294 233 302 241 307 C252 310 268 310 283 307 C287 290 285 270 277 255 Z"
+                fill="#825539"
+              />
+              <path
+                d="M306 238 C293 249 278 256 263 257 C242 255 232 260 233 268 C234 272 242 273 250 273 C232 274 225 280 229 288 C232 292 241 292 249 291 C236 294 233 302 241 307 C254 311 292 311 352 286"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Left Hind Foot (Bottom Left) */}
+              <path
+                d="M140 381 C143 363 133 351 122 359 C117 349 102 351 103 365 C91 361 84 372 95 382 C104 398 116 411 127 415 L191 409 L162 377 Z"
+                fill="#825539"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Right Hind Leg Crease Arc */}
+              <path
+                d="M278 396 C291 360 321 344 352 352 C361 355 368 361 373 368"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+              />
+
+              {/* Right Hind Foot (Bottom Center-Right) */}
+              <path
+                d="M282 392 C287 375 281 361 268 366 C265 354 249 354 247 369 C234 365 227 377 238 389 C246 409 255 428 265 435 C274 440 285 436 320 415 L292 392 Z"
+                fill="#C97E43"
+              />
+              <path
+                d="M282 392 C287 375 281 361 268 366 C265 354 249 354 247 369 C234 365 227 377 238 389 C246 409 255 428 265 435 C271 438 278 438 286 434 C287 418 285 403 282 392 Z"
+                fill="#825539"
+              />
+              <path
+                d="M282 392 C287 375 281 361 268 366 C265 354 249 354 247 369 C234 365 227 377 238 389 C246 409 255 428 265 435 C274 440 285 436 320 415"
+                stroke="#0B0908"
+                strokeWidth="8.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </div>
+      );
+    }
+
+    /**
+     * MeadowRestingCapybara:
+     * Calm botanical illustration inspired by Reference Image 3 (Capybara resting on grass)
+     * and Reference Image 2 (Quiet sky & clouds), used for empty states / not-found states.
+     */
+    function MeadowRestingCapybara({ className = "w-48 h-32" }) {
+      return (
+        <div className={`relative mx-auto select-none ${className}`}>
+          <svg viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            {/* Soft Archival Sky & Cloud Silhouette (Inspired by Ref Image 2) */}
+            <rect x="16" y="12" width="208" height="126" rx="16" fill="#E8E3D9" fillOpacity="0.55" />
+            <path
+              d="M65 110C58 88 64 52 84 44C78 34 88 26 98 32C110 28 134 28 146 32C156 26 166 34 160 44C178 52 184 88 176 110Z"
+              fill="#FCFBF7"
+              fillOpacity="0.8"
+            />
+
+            {/* Botanical Grass Bed (Inspired by Ref Image 3) */}
+            <path
+              d="M38 122C28 119 34 113 44 114C39 109 50 107 60 111C75 106 165 106 180 111C190 107 201 110 195 114C206 114 210 120 200 122C182 127 58 127 38 122Z"
+              fill="#C4D5C7"
+              stroke="#221E1C"
+              strokeWidth="2.2"
+              strokeLinejoin="round"
+            />
+
+            {/* Resting Capybara Figure */}
+            <path
+              d="M78 86C78 68 92 56 114 56C136 56 154 68 154 88C154 106 144 116 116 116H84C78 112 78 98 78 86Z"
+              fill="#A98467"
+              stroke="#221E1C"
+              strokeWidth="2.4"
+              strokeLinejoin="round"
+            />
+            {/* Snout & Closed Peaceful Eye */}
+            <rect x="82" y="64" width="20" height="22" rx="8" fill="#7A5946" stroke="#221E1C" strokeWidth="2" />
+            <circle cx="89" cy="71" r="1.6" fill="#221E1C" />
+            <circle cx="96" cy="71" r="1.6" fill="#221E1C" />
+            <path d="M108 69H115" stroke="#221E1C" strokeWidth="2.2" strokeLinecap="round" />
+            <ellipse cx="122" cy="57" rx="6" ry="4" fill="#7F5F48" stroke="#221E1C" strokeWidth="2.2" />
+
+            {/* Front Paws Resting on Grass (Ref Image 3) */}
+            <path d="M96 98V116M103 98V116" stroke="#221E1C" strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M128 98V116M135 98V116" stroke="#221E1C" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // 6. TACTILE LIBRARY INDEX CARD COMPONENT (3D FLIP + KEYBOARD ACCESSIBLE)
+    // ============================================================================
+    function LibraryIndexCard({ item, index, total, onPronounce, onInspect, soundEnabled }) {
+      const [flipped, setFlipped] = useState(false);
+      const posStyle = getPosStyle(item.partOfSpeech);
+      const tier = getLexiconTier(item.word, item.partOfSpeech);
+      const catalogNo = getCatalogCode(item.word);
+
+      const handleFlip = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setFlipped((prev) => !prev);
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          handleFlip();
+        }
+      };
+
+      return (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-pressed={flipped}
+          aria-label={`Kartu katalog ${index + 1} dari ${total}: ${item.word} (${item.partOfSpeech}). Tekan Spasi atau Enter untuk membalik kartu.`}
+          onClick={handleFlip}
+          onKeyDown={handleKeyDown}
+          className="perspective-1000 w-72 sm:w-80 h-60 shrink-0 cursor-pointer select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-sage rounded-[14px]"
+        >
+          <div
+            className={`flip-card-inner ${
+              flipped ? "is-flipped" : ""
+            } rounded-[14px] shadow-index-card`}
+          >
+            {/* FRONT SIDE: Classic Library Index Card with Top Red/Terracotta Header Line & Brass Rod Hole */}
+            <div className="flip-card-front bg-parchment dark:bg-nightCard ruled-card-bg border-2 border-[#C8BFA8] dark:border-[#3D362E] p-5 flex flex-col justify-between relative overflow-hidden">
+              {/* Top Archival Ruled Line */}
+              <div className="flex items-center justify-between gap-2 pb-2 border-b-2 border-terracotta/40 dark:border-terracotta/50">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] font-semibold text-umber dark:text-[#B8AFA6]">
+                    {catalogNo}
+                  </span>
+                  <TierStampBadge tier={tier} />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPronounce(item.word);
+                  }}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  className="btn-tactile w-8 h-8 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
+                  title={`Dengarkan pelafalan "${item.word}"`}
+                  aria-label={`Dengarkan pelafalan ${item.word}`}
+                >
+                  <Icons.Speaker className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Center Headword */}
+              <div className="my-auto py-1">
+                <div className="flex items-baseline gap-2.5 flex-wrap">
+                  <h4 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] tracking-tight">
+                    {item.word}
+                  </h4>
+                  {item.phonetic && (
+                    <span className="font-mono text-xs text-umber dark:text-[#B8AFA6]">
+                      {item.phonetic}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-2.5 flex items-center gap-2 flex-wrap">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border ${posStyle.bg} ${posStyle.text} ${posStyle.border}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} />
+                    <span className="capitalize">{item.partOfSpeech}</span>
+                  </span>
+                  {item.context && (
+                    <span className="text-[11px] text-umber dark:text-[#A59C94] truncate">
+                      • {item.context}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Footer with Classic Catalog Punch Hole */}
+              <div className="pt-2 border-t border-stoneDesk dark:border-nightBorder flex items-center justify-between text-[11px] font-mono text-umber dark:text-[#A59C94]">
+                <span className="inline-flex items-center gap-1.5 text-espresso dark:text-[#D9C7B0] font-sans font-medium">
+                  <Icons.FlipCard className="w-3.5 h-3.5 text-brass" />
+                  <span>Balik Kartu (Spasi)</span>
+                </span>
+                {/* Brass Catalog Rod Hole */}
+                <span className="w-3 h-3 rounded-full bg-linen dark:bg-nightDesk border border-[#B5AC99] dark:border-zinc-700 inline-block" />
+                <span>
+                  {String(index + 1).padStart(2, "0")}/{String(total).padStart(2, "0")}
+                </span>
+              </div>
+            </div>
+
+            {/* BACK SIDE: Complete Contextual Translation & Unclamped Bilingual Example */}
+            <div className="flip-card-back bg-[#F8F5EC] dark:bg-[#231F1B] border-2 border-brass/70 p-4 sm:p-5 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-stoneDesk dark:border-nightBorder shrink-0">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-sage dark:text-[#98B49E] font-semibold">
+                  CATATAN MAKNA // {item.partOfSpeech}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onInspect(item.word);
+                  }}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  className="text-[11px] font-medium text-espresso dark:text-[#D9C7B0] underline hover:text-terracotta"
+                >
+                  Buka Monograf →
+                </button>
+              </div>
+
+              {/* Scrollable full text area so long examples never get cut off */}
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="space-y-1.5 my-auto overflow-y-auto max-h-32 pr-1 cursor-auto"
+              >
+                <h4 className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] leading-snug">
+                  {item.meaning}
+                </h4>
+                {item.definition && (
+                  <p className="text-[11px] text-umber dark:text-[#B8AFA6] leading-relaxed">
+                    {item.definition}
+                  </p>
+                )}
+                {item.example?.en && (
+                  <div className="p-2.5 rounded-lg bg-parchment dark:bg-nightDesk border-l-2 border-sage space-y-0.5">
+                    <p className="text-xs font-medium text-espresso dark:text-[#EAE4DC] leading-relaxed">
+                      "{item.example.en}"
+                    </p>
+                    <p className="text-[11px] text-umber dark:text-[#A59C94] italic leading-relaxed">
+                      "{item.example.id}"
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] font-mono text-umber dark:text-[#A59C94] shrink-0 pt-1 border-t border-stoneDesk dark:border-nightBorder">
+                <span>Arsip: {item.dateAdded}</span>
+                <span className="text-espresso dark:text-[#D9C7B0] font-sans font-medium underline">
+                  Sisi Depan ↺
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // 7. VIEW 1: MEJA LEKSIKON (LEXICON DESK + INDEX CARD CATALOG DRAWER)
+    // ============================================================================
+    function LexiconDeskView({
+      query,
+      setQuery,
+      onSearch,
+      isLoading,
+      result,
+      hasSearched,
+      lastSearchedTerm,
+      searchHistory,
+      onClearHistory,
+      savedWords,
+      onSaveMeaning,
+      isMeaningSaved,
+      onPronounce,
+      isSpeaking,
+      mascotState,
+      setMascotState,
+      onNavigate,
+      onLoadStarterWords,
+      soundEnabled,
+      onGreetArchivist
+    }) {
+      const [langDirection, setLangDirection] = useState("en-id");
+      const [switchRotated, setSwitchRotated] = useState(false);
+      const [isListeningMic, setIsListeningMic] = useState(false);
+      const [activeCardIndex, setActiveCardIndex] = useState(0);
+      const carouselRef = useRef(null);
+      const typingTimeoutRef = useRef(null);
+
+      const availableWords = Object.keys(MOCK_WORDS);
+      const similarSuggestions = useMemo(
+        () => getSimilarWords(lastSearchedTerm),
+        [lastSearchedTerm]
+      );
+
+      useEffect(() => {
+        if (savedWords.length > 0 && activeCardIndex >= savedWords.length) {
+          setActiveCardIndex(savedWords.length - 1);
+        }
+      }, [savedWords.length, activeCardIndex]);
+
+      const handleInputChange = (e) => {
+        const val = e.target.value.slice(0, 120);
+        setQuery(val);
+        if (!isLoading) {
+          setMascotState("typing");
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => {
+            setMascotState("idle");
+          }, 900);
+        }
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!query.trim()) return;
+        onSearch(query);
+      };
+
+      const handleSwitchLanguages = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setSwitchRotated((prev) => !prev);
+        setLangDirection((prev) => (prev === "en-id" ? "id-en" : "en-id"));
+      };
+
+      const handleVoiceMic = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        if (
+          typeof window !== "undefined" &&
+          ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
+        ) {
+          try {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRec();
+            recognition.lang = langDirection === "en-id" ? "en-US" : "id-ID";
+            setIsListeningMic(true);
+            setMascotState("typing");
+            recognition.onresult = (event) => {
+              const transcript = event.results[0][0].transcript.replace(/[.,!?]/g, "");
+              setQuery(transcript);
+              setIsListeningMic(false);
+              onSearch(transcript);
+            };
+            recognition.onerror = () => {
+              setIsListeningMic(false);
+              setMascotState("idle");
+            };
+            recognition.onend = () => {
+              setIsListeningMic(false);
+            };
+            recognition.start();
+            return;
+          } catch (err) {
+            // Fallback below
+          }
+        }
+        setIsListeningMic(true);
+        setMascotState("typing");
+        const sampleVoiceWords = ["resilient", "break the ice", "piece of cake", "look after", "light"];
+        const randomPick = sampleVoiceWords[Math.floor(Math.random() * sampleVoiceWords.length)];
+        setTimeout(() => {
+          setIsListeningMic(false);
+          setQuery(randomPick);
+          onSearch(randomPick);
+        }, 850);
+      };
+
+      const scrollToCardIndex = (targetIdx) => {
+        if (!carouselRef.current || savedWords.length === 0) return;
+        const clamped = Math.max(0, Math.min(savedWords.length - 1, targetIdx));
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setActiveCardIndex(clamped);
+        const cardWidth = 320;
+        carouselRef.current.scrollTo({
+          left: clamped * cardWidth,
+          behavior: "smooth"
+        });
+      };
+
+      const scrollCarousel = (dir) => {
+        const nextIdx =
+          dir === "left"
+            ? Math.max(0, activeCardIndex - 1)
+            : Math.min(savedWords.length - 1, activeCardIndex + 1);
+        scrollToCardIndex(nextIdx);
+      };
+
+      const handleCarouselScroll = () => {
+        if (!carouselRef.current || savedWords.length === 0) return;
+        const scrollLeft = carouselRef.current.scrollLeft;
+        const approxCardWidth = 310;
+        const idx = Math.round(scrollLeft / approxCardWidth);
+        const clamped = Math.max(0, Math.min(savedWords.length - 1, idx));
+        if (clamped !== activeCardIndex) {
+          setActiveCardIndex(clamped);
+        }
+      };
+
+      return (
+        <div className="space-y-8 animate-fade-slide">
+          {/* =================================================================== */}
+          {/* ARCHIVAL STUDY HEADER WITH SCHOLARLY CAPYBARA                       */}
+          {/* =================================================================== */}
+          <section className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-2.5 max-w-xl text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-[11px] uppercase tracking-wider text-umber dark:text-[#B8AFA6]">
+                  <span>MONOGRAPH SERIES // EN–ID</span>
+                  <span>•</span>
+                  <span>STUDI KONTEKSTUAL</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] leading-snug">
+                  Catatan Leksikon & Telaah Makna Kontekstual.
+                </h1>
+                <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6] leading-relaxed">
+                  Telusuri perubahan makna kata bahasa Inggris berdasarkan kelas kata, ragam situasi, serta idiom bersama{" "}
+                  <span className="font-semibold text-espresso dark:text-[#EAE4DC]">
+                    Kapi sang Pustakawan
+                  </span>
+                  —lalu arsipkan ke dalam laci kartu katalog pribadimu.
+                </p>
+              </div>
+
+              {/* Scholarly Capybara Desk Card (Fine-line ink & coffee/spectacles, NO orange) */}
+              <div className="flex items-center gap-3.5 bg-linen/90 dark:bg-nightDesk px-4 py-3 rounded-xl border border-stoneDesk dark:border-nightBorder shrink-0">
+                <ArchivistCapybara
+                  state={mascotState}
+                  onClick={onGreetArchivist}
+                  className="w-24 h-24 shrink-0"
+                />
+                <div className="space-y-1 max-w-[180px]">
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-sage dark:text-[#98B49E] font-semibold">
+                    {mascotState === "typing"
+                      ? "LENSA PENGAMATAN AKTIF"
+                      : mascotState === "processing"
+                      ? "MENELAAH INDEKS..."
+                      : mascotState === "celebrating"
+                      ? "KARTU DIARSIPKAN"
+                      : "MEJA BACA TENANG"}
+                  </div>
+                  <p className="text-xs text-espresso dark:text-[#EAE4DC] leading-relaxed">
+                    {mascotState === "typing"
+                      ? "Kapi memeriksa entri yang sedang Anda ketik melalui lensa pembesar."
+                      : mascotState === "processing"
+                      ? "Membuka lembaran monograf dan transkripsi fonetik..."
+                      : mascotState === "celebrating"
+                      ? "Entri baru telah dicap dan disimpan ke dalam laci katalog."
+                      : "Menikmati secangkir kopi hangat sambil menemani telaah kosakata Anda."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* =================================================================== */}
+          {/* TWO-COLUMN EDITORIAL DESK: SEARCH INQUIRY & MONOGRAPH BREAKDOWN     */}
+          {/* =================================================================== */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            {/* LEFT PANEL: SPECIMEN INQUIRY & CATALOG INDEX (5 Columns) */}
+            <div className="lg:col-span-5 bg-parchment dark:bg-nightCard rounded-2xl p-6 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between space-y-5">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded bg-slateLight dark:bg-[#232D34] text-espresso dark:text-[#D5E2EC] border border-[#C5D3DD] dark:border-[#364652] text-xs font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-riverSlate dark:bg-[#8CA7BA]" />
+                    <span>
+                      {langDirection === "en-id"
+                        ? "Entri Bahasa Inggris → Indonesia"
+                        : "Kata Kunci Indonesia → Inggris"}
+                    </span>
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={handleSwitchLanguages}
+                    className="btn-tactile px-2.5 py-1 rounded border border-stoneDesk dark:border-nightBorder bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] text-xs font-mono inline-flex items-center gap-1.5 hover:border-brass"
+                    title="Tukar arah pencarian bahasa"
+                  >
+                    <Icons.SwitchDir
+                      className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                        switchRotated ? "rotate-180" : ""
+                      }`}
+                    />
+                    <span>{langDirection === "en-id" ? "EN/ID" : "ID/EN"}</span>
+                  </button>
+                </div>
+
+                {/* Main Interactive Input (2px tactile border) */}
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="relative">
+                    <textarea
+                      rows="3"
+                      value={query}
+                      onChange={handleInputChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          if (query.trim()) onSearch(query);
+                        }
+                      }}
+                      placeholder={
+                        langDirection === "en-id"
+                          ? "Ketik kata, phrasal verb, atau idiom... (mis. run, light, break the ice, resilient)"
+                          : "Ketik arti bahasa Indonesia untuk mencari padanan Inggrisnya... (mis. berlari, ringan, tangguh)"
+                      }
+                      className="w-full p-4 rounded-xl bg-linen/70 dark:bg-nightDesk border-2 border-[#B5AC99] dark:border-[#4A423B] focus:border-espresso dark:focus:border-[#C8A97E] text-base font-medium text-espresso dark:text-[#F5F2EB] placeholder:text-umber/60 dark:placeholder:text-[#8C827A] focus:outline-none resize-none transition-colors"
+                      aria-label="Kotak pencarian leksikon kontekstual"
+                    />
+                  </div>
+
+                  <p className="text-[11px] text-umber dark:text-[#A59C94] leading-relaxed">
+                    Catatan meja: Fokus pada pembedahan makna kosakata tunggal, phrasal verb, dan idiom beserta konteks penggunaannya.
+                  </p>
+
+                  {/* Action Toolbar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleVoiceMic}
+                        className={`btn-tactile px-3 py-2 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 ${
+                          isListeningMic
+                            ? "bg-sage text-white border-sage"
+                            : "bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border-stoneDesk dark:border-nightBorder hover:border-brass"
+                        }`}
+                        title="Gunakan pendiktean suara"
+                      >
+                        <Icons.Mic className="w-3.5 h-3.5" />
+                        <span>{isListeningMic ? "Menyimak..." : "Dikte"}</span>
+                      </button>
+
+                      {query && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            ArchivalAudio.playKeyClick(soundEnabled);
+                            setQuery("");
+                          }}
+                          className="btn-tactile px-2.5 py-2 rounded-lg bg-linen dark:bg-nightDesk text-umber dark:text-[#B8AFA6] hover:text-espresso border border-stoneDesk dark:border-nightBorder text-xs font-mono"
+                        >
+                          ✕ Bersihkan
+                        </button>
+                      )}
+
+                      <span className="font-mono text-[11px] text-umber/70 dark:text-[#8C827A]">
+                        {query.length}/120
+                      </span>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading || !query.trim()}
+                      className="btn-tactile px-5 py-2.5 rounded-lg bg-espresso hover:bg-[#36302D] dark:bg-[#EAE4DC] dark:hover:bg-white text-parchment dark:text-espresso disabled:opacity-40 font-medium text-xs inline-flex items-center gap-2"
+                    >
+                      <Icons.Search className="w-3.5 h-3.5" />
+                      <span>{isLoading ? "Menelaah..." : "Telaah Entri"}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Curated Specimen Index & Recent Inquiries (1px subtle divider) */}
+              <div className="space-y-3 pt-4 border-t border-stoneDesk dark:border-nightBorder">
+                <div className="space-y-1.5">
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-umber dark:text-[#A59C94]">
+                    INDEKS SPESIMEN TERSEDIA ({availableWords.length} ENTRI)
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableWords.map((word) => {
+                      const isCurrent = lastSearchedTerm.toLowerCase() === word.toLowerCase();
+                      return (
+                        <button
+                          key={word}
+                          type="button"
+                          onClick={() => {
+                            ArchivalAudio.playKeyClick(soundEnabled);
+                            onSearch(word);
+                          }}
+                          className={`btn-tactile px-2.5 py-1 rounded text-xs font-mono border transition-colors ${
+                            isCurrent
+                              ? "bg-espresso text-parchment border-espresso dark:bg-[#EAE4DC] dark:text-espresso"
+                              : "bg-linen dark:bg-nightDesk text-espresso/85 dark:text-[#D5CFC7] border-stoneDesk dark:border-nightBorder hover:border-brass"
+                          }`}
+                        >
+                          {word}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {searchHistory.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stoneDesk/60 dark:border-nightBorder/60">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="font-mono text-[10px] uppercase text-umber dark:text-[#A59C94]">
+                        Riwayat:
+                      </span>
+                      {searchHistory.map((item) => (
+                        <button
+                          key={item}
+                          type="button"
+                          onClick={() => onSearch(item)}
+                          className="px-2 py-0.5 rounded text-[11px] font-mono bg-linen/80 dark:bg-nightDesk text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white border border-stoneDesk dark:border-nightBorder"
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={onClearHistory}
+                      className="font-mono text-[11px] text-umber hover:text-terracotta dark:text-[#A59C94] underline"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT PANEL: MONOGRAPH BREAKDOWN SHEET (7 Columns) */}
+            <div className="lg:col-span-7 bg-parchment dark:bg-nightCard rounded-2xl p-6 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-2 pb-4 border-b border-stoneDesk dark:border-nightBorder">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-sage dark:text-[#98B49E]">
+                    LEMBAR MONOGRAF //
+                  </span>
+                  <span className="font-mono text-xs text-umber dark:text-[#B8AFA6]">
+                    {result && !isLoading ? result.catalogNo || "WL-ARC" : "SIAP"}
+                  </span>
+                </div>
+
+                {result && !isLoading && (
+                  <TierStampBadge tier={result.tier || 1} />
+                )}
+              </div>
+
+              <div className="my-auto py-4">
+                {isLoading ? (
+                  <div className="py-12 text-center space-y-3 animate-pulse">
+                    <div className="w-14 h-14 mx-auto rounded-full bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-brass">
+                      <Icons.Search className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                        Menelusuri arsip leksikon dan contoh konteks...
+                      </h3>
+                      <p className="text-xs font-mono text-umber dark:text-[#A59C94]">
+                        MEMUAT FONETIK & VARIASI KELAS KATA
+                      </p>
+                    </div>
+                  </div>
+                ) : !hasSearched ? (
+                  <div className="py-12 text-center space-y-2">
+                    <p className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                      Pilih atau ketik sebuah entri di panel kiri untuk ditelaah.
+                    </p>
+                    <p className="text-xs text-umber dark:text-[#A59C94]">
+                      Tersedia entri polimisemi seperti "run", "light", "break", maupun idiom "break the ice".
+                    </p>
+                  </div>
+                ) : !result ? (
+                  /* Calm Botanical Not Found State + Fuzzy Similar Recommendations */
+                  <div className="py-4 text-center space-y-4">
+                    <MeadowRestingCapybara className="w-48 h-28" />
+                    <div className="space-y-1 max-w-md mx-auto">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-terracotta dark:text-[#D99B8C] font-semibold">
+                        ENTRI BELUM TERCATAT DI ARSIP LOKAL
+                      </span>
+                      <h3 className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                        Tidak ditemukan monograf untuk "{lastSearchedTerm}"
+                      </h3>
+                      <p className="text-xs text-umber dark:text-[#B8AFA6] leading-relaxed">
+                        Katalog luring ini memuat 10 entri kurasi mendalam. Apakah Anda bermaksud menelaah salah satu entri yang berdekatan di bawah ini?
+                      </p>
+                    </div>
+
+                    {similarSuggestions.length > 0 && (
+                      <div className="p-3.5 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder space-y-2 max-w-md mx-auto">
+                        <div className="font-mono text-[10px] uppercase text-umber dark:text-[#A59C94]">
+                          Rekomendasi Entri Terdekat:
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {similarSuggestions.map((sug) => (
+                            <button
+                              key={sug.key}
+                              type="button"
+                              onClick={() => onSearch(sug.key)}
+                              className="btn-tactile px-3 py-1.5 rounded-lg text-xs font-mono bg-parchment dark:bg-nightCard text-espresso dark:text-[#F5F2EB] border border-brass/60 inline-flex items-center gap-1.5"
+                            >
+                              <span className="font-semibold">{sug.key}</span>
+                              <span className="text-[11px] font-sans text-umber dark:text-[#B8AFA6]">
+                                ({sug.mainTranslation})
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Complete Monograph Headword + Numbered Contextual Senses */
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 bg-linen/80 dark:bg-nightDesk p-4 rounded-xl border border-stoneDesk dark:border-nightBorder">
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        <h2 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                          {result.word}
+                        </h2>
+                        <span className="font-mono text-sm text-umber dark:text-[#C8A97E]">
+                          {result.phonetic}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => onPronounce(result.word)}
+                        className={`btn-tactile px-3.5 py-2 rounded-lg border text-xs font-medium inline-flex items-center gap-2 ${
+                          isSpeaking
+                            ? "bg-sage text-white border-sage"
+                            : "bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border-sage/40 hover:border-sage"
+                        }`}
+                      >
+                        <Icons.Speaker className="w-4 h-4" />
+                        <span>Lafalkan (en-US)</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 max-h-[390px] overflow-y-auto pr-1">
+                      {result.meanings.map((meaningObj, idx) => {
+                        const posStyle = getPosStyle(meaningObj.partOfSpeech);
+                        const saved = isMeaningSaved(
+                          result.word,
+                          meaningObj.partOfSpeech,
+                          meaningObj.translation
+                        );
+
+                        return (
+                          <div
+                            key={`${result.word}-${idx}`}
+                            className="p-4 rounded-xl bg-linen/45 dark:bg-nightDesk/70 border border-stoneDesk dark:border-nightBorder space-y-3 hover:border-brass/70 transition-colors"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-mono text-xs text-brass dark:text-[#C8A97E] font-semibold">
+                                  {String(idx + 1).padStart(2, "0")}.
+                                </span>
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium border ${posStyle.bg} ${posStyle.text} ${posStyle.border}`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} />
+                                  <span className="capitalize">{meaningObj.partOfSpeech}</span>
+                                </span>
+                                {meaningObj.context && (
+                                  <span className="font-mono text-[11px] text-umber dark:text-[#A59C94]">
+                                    [{meaningObj.context}]
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Primary CTA: Stamp & Archive to Index Card Drawer */}
+                              <button
+                                type="button"
+                                disabled={saved}
+                                onClick={() =>
+                                  onSaveMeaning(result.word, result.phonetic, meaningObj)
+                                }
+                                className={`btn-tactile px-3.5 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 border-2 self-start sm:self-auto ${
+                                  saved
+                                    ? "bg-sageLight/70 dark:bg-[#222D24] text-espresso dark:text-[#BBD0BF] border-sage/40 cursor-default"
+                                    : "bg-parchment hover:bg-stoneDesk/60 dark:bg-nightCard text-espresso dark:text-[#F5F2EB] border-espresso dark:border-[#C8A97E]"
+                                }`}
+                              >
+                                {saved ? (
+                                  <>
+                                    <Icons.Check className="w-3.5 h-3.5 text-sage" />
+                                    <span>Terarsip di Katalog</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Icons.Bookmark className="w-3.5 h-3.5 text-brass" />
+                                    <span>+ Arsipkan Kartu</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+
+                            <div>
+                              <h3 className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                                {meaningObj.translation}
+                              </h3>
+                              <p className="text-xs text-umber dark:text-[#B8AFA6] mt-0.5 leading-relaxed">
+                                {meaningObj.definition}
+                              </p>
+                            </div>
+
+                            {meaningObj.examples && meaningObj.examples.length > 0 && (
+                              <div className="space-y-1.5 pt-2 border-t border-stoneDesk/70 dark:border-nightBorder">
+                                {meaningObj.examples.map((ex, exIdx) => (
+                                  <div
+                                    key={exIdx}
+                                    className="pl-3 border-l-2 border-brass/70 py-0.5 space-y-0.5"
+                                  >
+                                    <p className="text-xs font-medium text-espresso dark:text-[#EAE4DC] leading-relaxed">
+                                      "{ex.en}"
+                                    </p>
+                                    <p className="text-xs text-umber dark:text-[#A59C94] italic leading-relaxed">
+                                      "{ex.id}"
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* =================================================================== */}
+          {/* BOTTOM DRAWER: LACI KARTU INDEKS AKTIF (3D FLIP CATALOG CARDS)      */}
+          {/* =================================================================== */}
+          <section className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-brass dark:text-[#C8A97E] font-semibold">
+                  LACI KARTU INDEKS // {savedWords.length} ARSIP TERSIMPAN
+                </div>
+                <h2 className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  Kartu Katalog Pustaka (Klik atau Tekan Spasi untuk Membalik)
+                </h2>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                {savedWords.length < 5 && (
+                  <button
+                    type="button"
+                    onClick={onLoadStarterWords}
+                    className="btn-tactile px-3.5 py-2 rounded-lg bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border border-stoneDesk dark:border-nightBorder text-xs font-medium hover:border-brass"
+                  >
+                    + Muat 5 Kartu Spesimen
+                  </button>
+                )}
+
+                {savedWords.length > 0 && (
+                  <div className="inline-flex items-center gap-2 bg-linen dark:bg-nightDesk px-3 py-1 rounded-lg border border-stoneDesk dark:border-nightBorder">
+                    <button
+                      type="button"
+                      onClick={() => scrollCarousel("left")}
+                      disabled={activeCardIndex <= 0}
+                      className="btn-tactile w-7 h-7 rounded bg-parchment dark:bg-nightCard disabled:opacity-35 border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-espresso dark:text-[#EAE4DC]"
+                      aria-label="Kartu sebelumnya"
+                    >
+                      <Icons.ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    <span className="font-mono text-xs text-espresso dark:text-[#D9C7B0] px-1">
+                      Kartu {Math.min(activeCardIndex + 1, savedWords.length)} dari {savedWords.length}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => scrollCarousel("right")}
+                      disabled={activeCardIndex >= savedWords.length - 1}
+                      className="btn-tactile w-7 h-7 rounded bg-parchment dark:bg-nightCard disabled:opacity-35 border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-espresso dark:text-[#EAE4DC]"
+                      aria-label="Kartu berikutnya"
+                    >
+                      <Icons.ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => onNavigate("dictionary")}
+                  className="btn-tactile px-4 py-2 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs"
+                >
+                  Buka Laci Katalog Lengkap ({savedWords.length}) →
+                </button>
+              </div>
+            </div>
+
+            {savedWords.length === 0 ? (
+              <div className="p-8 rounded-xl bg-linen/70 dark:bg-nightDesk border border-dashed border-stoneDesk dark:border-nightBorder text-center space-y-3">
+                <p className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  Laci kartu indeks masih kosong.
+                </p>
+                <p className="text-xs text-umber dark:text-[#A59C94] max-w-md mx-auto">
+                  Klik tombol <span className="font-semibold">[ + Arsipkan Kartu ]</span> pada lembar monograf di atas, atau muat 5 kartu spesimen awal untuk mencoba katalog interaktif.
+                </p>
+                <button
+                  type="button"
+                  onClick={onLoadStarterWords}
+                  className="btn-tactile px-4 py-2 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
+                >
+                  + Muat 5 Kartu Spesimen
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div
+                  ref={carouselRef}
+                  onScroll={handleCarouselScroll}
+                  className="flex items-center gap-4 overflow-x-auto pb-3 pt-1 px-1 snap-x snap-mandatory scroll-smooth"
+                >
+                  {savedWords.map((item, idx) => (
+                    <div key={item.id} className="snap-start">
+                      <LibraryIndexCard
+                        item={item}
+                        index={idx}
+                        total={savedWords.length}
+                        onPronounce={onPronounce}
+                        onInspect={(w) => onSearch(w)}
+                        soundEnabled={soundEnabled}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="flex items-center justify-center gap-1.5 pt-1" role="tablist" aria-label="Posisi kartu indeks">
+                  {savedWords.map((item, idx) => {
+                    const isCurrent = idx === activeCardIndex;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => scrollToCardIndex(idx)}
+                        aria-label={`Lompat ke kartu ${idx + 1}: ${item.word}`}
+                        aria-current={isCurrent ? "true" : "false"}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          isCurrent
+                            ? "w-6 bg-espresso dark:bg-[#C8A97E]"
+                            : "w-2 bg-stoneDesk dark:bg-nightBorder hover:bg-brass"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // 8. VIEW 2: LACI KATALOG (FULL ARCHIVAL DICTIONARY)
+    // ============================================================================
+    function CatalogArchiveView({
+      savedWords,
+      onDeleteWord,
+      onPronounce,
+      onNavigate,
+      onQuickSearch,
+      onLoadStarterWords,
+      soundEnabled
+    }) {
+      const [searchFilter, setSearchFilter] = useState("");
+      const [posFilter, setPosFilter] = useState("all");
+
+      const posCategories = ["all", "verb", "noun", "adjective", "idiom", "phrasal verb"];
+
+      const filteredWords = useMemo(() => {
+        return savedWords.filter((entry) => {
+          const matchesPos =
+            posFilter === "all" || entry.partOfSpeech.toLowerCase() === posFilter.toLowerCase();
+
+          const q = searchFilter.trim().toLowerCase();
+          if (!q) return matchesPos;
+
+          const matchesQuery =
+            entry.word.toLowerCase().includes(q) ||
+            entry.meaning.toLowerCase().includes(q) ||
+            (entry.definition && entry.definition.toLowerCase().includes(q)) ||
+            (entry.example?.en && entry.example.en.toLowerCase().includes(q)) ||
+            (entry.example?.id && entry.example.id.toLowerCase().includes(q));
+
+          return matchesPos && matchesQuery;
+        });
+      }, [savedWords, searchFilter, posFilter]);
+
+      const posCounts = useMemo(() => {
+        const counts = { all: savedWords.length };
+        posCategories.slice(1).forEach((cat) => {
+          counts[cat] = savedWords.filter((w) => w.partOfSpeech.toLowerCase() === cat).length;
+        });
+        return counts;
+      }, [savedWords]);
+
+      return (
+        <div className="space-y-6 animate-fade-slide">
+          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-brass dark:text-[#C8A97E] font-semibold">
+                  ARSIP INDEKS PRIBADI // {savedWords.length} KARTU
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  Laci Katalog Kosakata
+                </h1>
+                <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6]">
+                  Seluruh kartu kosakata kontekstual yang telah dicap dan disimpan bersama Kapi.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {savedWords.length < 5 && (
+                  <button
+                    type="button"
+                    onClick={onLoadStarterWords}
+                    className="btn-tactile px-3.5 py-2 rounded-lg bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border border-stoneDesk dark:border-nightBorder text-xs font-medium"
+                  >
+                    + Muat 5 Spesimen
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onNavigate("quiz")}
+                  className="btn-tactile px-4 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs"
+                >
+                  Buka Ruang Uji Ingatan (Kuis) →
+                </button>
+              </div>
+            </div>
+
+            {savedWords.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-stoneDesk dark:border-nightBorder">
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-umber">
+                    <Icons.Search className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                    placeholder="Saring arsip berdasarkan kata, terjemahan, atau kalimat contoh..."
+                    className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder focus:border-brass text-sm text-espresso dark:text-[#F5F2EB] focus:outline-none"
+                  />
+                  {searchFilter && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchFilter("")}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-umber"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {posCategories.map((cat) => {
+                    const active = posFilter === cat;
+                    const count = posCounts[cat] || 0;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          ArchivalAudio.playKeyClick(soundEnabled);
+                          setPosFilter(cat);
+                        }}
+                        className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-medium capitalize border transition-colors flex items-center gap-1.5 ${
+                          active
+                            ? "bg-espresso text-parchment border-espresso dark:bg-[#EAE4DC] dark:text-espresso"
+                            : "bg-linen dark:bg-nightDesk text-umber dark:text-[#B8AFA6] border-stoneDesk dark:border-nightBorder"
+                        }`}
+                      >
+                        <span>{cat === "all" ? "Semua Kelas" : cat}</span>
+                        <span className="font-mono text-[10px] opacity-75">
+                          ({count})
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {savedWords.length === 0 ? (
+            <div className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder shadow-archival space-y-4">
+              <MeadowRestingCapybara className="w-52 h-32" />
+              <div className="space-y-1 max-w-md mx-auto">
+                <h2 className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  Belum Ada Kartu di Laci Katalog
+                </h2>
+                <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6]">
+                  Telaah kosakata di Meja Leksikon atau muat 5 kartu spesimen contoh untuk mulai membangun koleksi Anda.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => onNavigate("translator")}
+                  className="btn-tactile px-4 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
+                >
+                  Ke Meja Leksikon
+                </button>
+                <button
+                  type="button"
+                  onClick={onLoadStarterWords}
+                  className="btn-tactile px-4 py-2.5 rounded-lg bg-sage text-white text-xs font-medium"
+                >
+                  + Muat 5 Kartu Spesimen
+                </button>
+              </div>
+            </div>
+          ) : filteredWords.length === 0 ? (
+            <div className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder space-y-3">
+              <h3 className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                Tidak ditemukan kartu yang cocok dengan penyaringan "{searchFilter}"
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchFilter("");
+                  setPosFilter("all");
+                }}
+                className="btn-tactile px-4 py-2 rounded-lg bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder text-xs font-medium"
+              >
+                Atur Ulang Penyaring
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredWords.map((item) => {
+                const posStyle = getPosStyle(item.partOfSpeech);
+                const tier = getLexiconTier(item.word, item.partOfSpeech);
+                const catalogNo = getCatalogCode(item.word);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-parchment dark:bg-nightCard rounded-xl p-5 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between gap-4 hover:border-brass/70 transition-colors"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2 pb-2 border-b border-stoneDesk/70 dark:border-nightBorder">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono text-[11px] text-brass dark:text-[#C8A97E]">
+                              {catalogNo}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => onQuickSearch(item.word)}
+                              className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] hover:underline"
+                            >
+                              {item.word}
+                            </button>
+                            {item.phonetic && (
+                              <span className="font-mono text-xs text-umber dark:text-[#B8AFA6]">
+                                {item.phonetic}
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => onPronounce(item.word)}
+                              className="btn-tactile w-7 h-7 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
+                              title={`Lafalkan ${item.word}`}
+                            >
+                              <Icons.Speaker className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border ${posStyle.bg} ${posStyle.text} ${posStyle.border}`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} />
+                              <span className="capitalize">{item.partOfSpeech}</span>
+                            </span>
+                            <TierStampBadge tier={tier} />
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => onDeleteWord(item.id, item.word)}
+                          className="btn-tactile p-2 rounded-lg text-umber hover:text-terracotta hover:bg-linen dark:hover:bg-nightDesk transition-colors"
+                          title="Keluarkan dari Laci Katalog"
+                        >
+                          <Icons.Trash className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div>
+                        <div className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                          {item.meaning}
+                        </div>
+                        {item.definition && (
+                          <p className="text-xs text-umber dark:text-[#B8AFA6] mt-0.5 leading-relaxed">
+                            {item.definition}
+                          </p>
+                        )}
+                      </div>
+
+                      {item.example?.en && (
+                        <div className="p-3 rounded-lg bg-linen/75 dark:bg-nightDesk border-l-2 border-sage space-y-0.5">
+                          <p className="text-xs font-medium text-espresso dark:text-[#EAE4DC] leading-relaxed">
+                            "{item.example.en}"
+                          </p>
+                          <p className="text-[11px] text-umber dark:text-[#A59C94] italic leading-relaxed">
+                            "{item.example.id}"
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2.5 border-t border-stoneDesk/60 dark:border-nightBorder flex items-center justify-between text-[11px] font-mono text-umber dark:text-[#A59C94]">
+                      <span>Diarsipkan {item.dateAdded}</span>
+                      <button
+                        type="button"
+                        onClick={() => onQuickSearch(item.word)}
+                        className="text-espresso dark:text-[#D9C7B0] font-sans font-medium hover:underline"
+                      >
+                        Telaah Monograf →
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // 9. VIEW 3: RUANG UJI INGATAN (CUSTOM RANDOM VOCABULARY QUIZ)
+    // ============================================================================
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildQuizQuestions(savedWords, requestedCount) {
+      if (!savedWords || savedWords.length === 0) return [];
+      const validCount = Math.min(Math.max(1, Number(requestedCount) || 1), savedWords.length);
+      const selectedItems = shuffleArray(savedWords).slice(0, validCount);
+
+      const distractorPoolSet = new Set();
+      savedWords.forEach((item) => {
+        if (item.meaning) distractorPoolSet.add(item.meaning);
+      });
+      Object.values(MOCK_WORDS).forEach((entry) => {
+        entry.meanings.forEach((m) => {
+          if (m.translation) distractorPoolSet.add(m.translation);
+        });
+      });
+      const allTranslations = Array.from(distractorPoolSet);
+
+      return selectedItems.map((item) => {
+        const correctAnswer = item.meaning;
+        const wrongCandidates = allTranslations.filter(
+          (t) => t.toLowerCase().trim() !== correctAnswer.toLowerCase().trim()
+        );
+        const distractors = shuffleArray(wrongCandidates).slice(0, 3);
+        const options = shuffleArray([correctAnswer, ...distractors]);
+
+        return {
+          id: item.id,
+          word: item.word,
+          phonetic: item.phonetic,
+          partOfSpeech: item.partOfSpeech,
+          context: item.context,
+          definition: item.definition,
+          example: item.example,
+          correctAnswer,
+          options
+        };
+      });
+    }
+
+    function RecallExaminationView({
+      savedWords,
+      onPronounce,
+      onNavigate,
+      onLoadStarterWords,
+      soundEnabled
+    }) {
+      const [quizWordCount, setQuizWordCount] = useState(() =>
+        Math.min(5, Math.max(1, savedWords.length || 5))
+      );
+      const [quizState, setQuizState] = useState("setup"); // "setup" | "active" | "summary"
+      const [quizQuestions, setQuizQuestions] = useState([]);
+      const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+      const [selectedOption, setSelectedOption] = useState(null);
+      const [quizAnswers, setQuizAnswers] = useState([]);
+
+      useEffect(() => {
+        if (savedWords.length > 0) {
+          setQuizWordCount((prev) => Math.min(Math.max(1, Number(prev) || 1), savedWords.length));
+        }
+      }, [savedWords.length]);
+
+      const presetCounts = useMemo(() => {
+        const total = savedWords.length;
+        if (total <= 0) return [];
+        const candidates = [3, 5, 10].filter((n) => n < total);
+        return [...candidates, total];
+      }, [savedWords.length]);
+
+      const handleStartQuiz = (customCount) => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        const countToUse =
+          typeof customCount === "number"
+            ? customCount
+            : Math.min(Math.max(1, Number(quizWordCount) || 1), savedWords.length);
+
+        const generated = buildQuizQuestions(savedWords, countToUse);
+        if (generated.length === 0) return;
+
+        setQuizWordCount(countToUse);
+        setQuizQuestions(generated);
+        setCurrentQuestionIndex(0);
+        setSelectedOption(null);
+        setQuizAnswers([]);
+        setQuizState("active");
+      };
+
+      const handleSelectAnswer = (option) => {
+        if (selectedOption !== null) return;
+        setSelectedOption(option);
+
+        const currentQ = quizQuestions[currentQuestionIndex];
+        const isCorrect = option === currentQ.correctAnswer;
+
+        if (isCorrect) {
+          ArchivalAudio.playBellChord(soundEnabled);
+        } else {
+          ArchivalAudio.playKeyClick(soundEnabled);
+        }
+
+        setQuizAnswers((prev) => [
+          ...prev,
+          {
+            question: currentQ,
+            selected: option,
+            isCorrect
+          }
+        ]);
+      };
+
+      const handleNextQuestion = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        if (currentQuestionIndex + 1 < quizQuestions.length) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+          setSelectedOption(null);
+        } else {
+          ArchivalAudio.playBellChord(soundEnabled);
+          setQuizState("summary");
+        }
+      };
+
+      const handleResetSetup = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setQuizState("setup");
+        setSelectedOption(null);
+        setCurrentQuestionIndex(0);
+        setQuizAnswers([]);
+      };
+
+      const currentQuestion = quizQuestions[currentQuestionIndex] || null;
+      const correctCount = quizAnswers.filter((a) => a.isCorrect).length;
+      const scorePercentage =
+        quizQuestions.length > 0 ? Math.round((correctCount / quizQuestions.length) * 100) : 0;
+
+      if (savedWords.length === 0) {
+        return (
+          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder shadow-archival space-y-4 animate-fade-slide">
+            <SleepingBookCapybara className="w-36 h-32 mx-auto" />
+            <div className="space-y-1 max-w-md mx-auto">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-brass dark:text-[#C8A97E]">
+                RUANG UJI INGATAN // PERSIAPAN
+              </span>
+              <h2 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                Laci Katalog Belum Memiliki Kartu
+              </h2>
+              <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6]">
+                Uji ingatan menarik sejumlah kartu acak dari Laci Katalog Anda. Muat 5 kartu spesimen contoh di bawah ini untuk langsung memulai.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={onLoadStarterWords}
+                className="btn-tactile px-4 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
+              >
+                + Muat 5 Kartu Spesimen
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate("translator")}
+                className="btn-tactile px-4 py-2.5 rounded-lg bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder text-xs font-medium"
+              >
+                Ke Meja Leksikon
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (quizState === "setup") {
+        return (
+          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-5 border-b border-stoneDesk dark:border-nightBorder">
+              <div className="space-y-2 text-center md:text-left">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-brass dark:text-[#C8A97E] font-semibold">
+                  EVALUASI LEKSIKON ACAK // SELECT THE CORRECT ANSWER
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  Ruang Uji Ingatan Kosakata
+                </h1>
+                <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6] max-w-xl">
+                  Tentukan jumlah kartu acak yang ingin ditarik dari{" "}
+                  <span className="font-semibold text-espresso dark:text-[#EAE4DC]">
+                    {savedWords.length} arsip
+                  </span>{" "}
+                  di Laci Katalog Anda, lalu pilih terjemahan kontekstual yang paling tepat.
+                </p>
+              </div>
+              <SleepingBookCapybara className="w-28 h-28 shrink-0" />
+            </div>
+
+            <div className="space-y-3">
+              <label
+                htmlFor="archival-quiz-count"
+                className="block font-mono text-xs uppercase tracking-wider text-umber dark:text-[#B8AFA6]"
+              >
+                Jumlah Kartu Acak yang Diujikan (1 – {savedWords.length})
+              </label>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="inline-flex items-center rounded-xl border-2 border-espresso dark:border-[#C8A97E] bg-linen dark:bg-nightDesk p-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      ArchivalAudio.playKeyClick(soundEnabled);
+                      setQuizWordCount((prev) => Math.max(1, (Number(prev) || 1) - 1));
+                    }}
+                    disabled={quizWordCount <= 1}
+                    className="btn-tactile w-8 h-8 rounded-lg bg-parchment dark:bg-nightCard disabled:opacity-35 text-espresso dark:text-[#F5F2EB] font-mono text-sm flex items-center justify-center border border-stoneDesk dark:border-nightBorder"
+                  >
+                    -
+                  </button>
+                  <input
+                    id="archival-quiz-count"
+                    type="number"
+                    min="1"
+                    max={savedWords.length}
+                    value={quizWordCount}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setQuizWordCount("");
+                        return;
+                      }
+                      const parsed = parseInt(raw, 10);
+                      if (!isNaN(parsed)) {
+                        setQuizWordCount(Math.min(Math.max(1, parsed), savedWords.length));
+                      }
+                    }}
+                    onBlur={() => {
+                      if (!quizWordCount || quizWordCount < 1) setQuizWordCount(1);
+                    }}
+                    className="w-14 text-center bg-transparent font-mono font-semibold text-base text-espresso dark:text-[#F5F2EB] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      ArchivalAudio.playKeyClick(soundEnabled);
+                      setQuizWordCount((prev) =>
+                        Math.min(savedWords.length, (Number(prev) || 1) + 1)
+                      );
+                    }}
+                    disabled={quizWordCount >= savedWords.length}
+                    className="btn-tactile w-8 h-8 rounded-lg bg-parchment dark:bg-nightCard disabled:opacity-35 text-espresso dark:text-[#F5F2EB] font-mono text-sm flex items-center justify-center border border-stoneDesk dark:border-nightBorder"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-mono text-xs text-umber dark:text-[#A59C94] mr-1">
+                    Preset:
+                  </span>
+                  {presetCounts.map((val) => {
+                    const active = Number(quizWordCount) === val;
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => {
+                          ArchivalAudio.playKeyClick(soundEnabled);
+                          setQuizWordCount(val);
+                        }}
+                        className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-mono border ${
+                          active
+                            ? "bg-espresso text-parchment border-espresso dark:bg-[#EAE4DC] dark:text-espresso"
+                            : "bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border-stoneDesk dark:border-nightBorder"
+                        }`}
+                      >
+                        {val === savedWords.length ? `Semua (${val})` : `${val} Kartu`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-stoneDesk dark:border-nightBorder flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => onNavigate("dictionary")}
+                className="text-xs font-medium text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white"
+              >
+                ← Kembali ke Laci Katalog
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleStartQuiz()}
+                className="btn-tactile px-6 py-2.5 rounded-lg bg-espresso hover:bg-[#36302D] dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs"
+              >
+                Mulai Evaluasi ({Math.min(Math.max(1, Number(quizWordCount) || 1), savedWords.length)} Soal Acak) →
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (quizState === "active" && currentQuestion) {
+        const tier = getLexiconTier(currentQuestion.word, currentQuestion.partOfSpeech);
+
+        return (
+          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between font-mono text-xs text-umber dark:text-[#B8AFA6]">
+                <span>
+                  SPESIMEN {String(currentQuestionIndex + 1).padStart(2, "0")} DARI{" "}
+                  {String(quizQuestions.length).padStart(2, "0")}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleResetSetup}
+                  className="hover:text-terracotta underline"
+                >
+                  Ubah Jumlah / Batalkan
+                </button>
+              </div>
+              <div className="w-full h-1.5 bg-linen dark:bg-nightDesk rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-sage transition-all duration-300"
+                  style={{
+                    width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Question Specimen Box */}
+            <div className="p-5 sm:p-6 rounded-xl bg-linen/75 dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="space-y-2 text-center sm:text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <span className="px-2.5 py-0.5 rounded bg-parchment dark:bg-nightCard border border-stoneDesk dark:border-nightBorder font-mono text-xs capitalize text-espresso dark:text-[#EAE4DC]">
+                    {currentQuestion.partOfSpeech}
+                  </span>
+                  <TierStampBadge tier={tier} />
+                </div>
+
+                <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap">
+                  <h2 className="text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                    {currentQuestion.word}
+                  </h2>
+                  {currentQuestion.phonetic && (
+                    <span className="font-mono text-sm text-brass dark:text-[#C8A97E]">
+                      {currentQuestion.phonetic}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onPronounce(currentQuestion.word)}
+                    className="btn-tactile w-8 h-8 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
+                    title="Lafalkan kata"
+                  >
+                    <Icons.Speaker className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {currentQuestion.definition && (
+                  <p className="text-xs text-umber dark:text-[#B8AFA6] max-w-lg leading-relaxed">
+                    Definisi konteks: "{currentQuestion.definition}"
+                  </p>
+                )}
+              </div>
+
+              <ReadingBookCapybara className="w-24 h-24 shrink-0" />
+            </div>
+
+            {/* 4 Multiple Choice Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {currentQuestion.options.map((option, idx) => {
+                const optionLetter = String.fromCharCode(65 + idx);
+                const isAnswered = selectedOption !== null;
+                const isChosen = selectedOption === option;
+                const isCorrectOption = option === currentQuestion.correctAnswer;
+
+                let btnStyle =
+                  "bg-parchment dark:bg-nightCard border-stoneDesk dark:border-nightBorder hover:border-espresso dark:hover:border-[#C8A97E] text-espresso dark:text-[#F5F2EB]";
+
+                if (isAnswered) {
+                  if (isCorrectOption) {
+                    btnStyle =
+                      "bg-sageLight dark:bg-[#222D24] border-sage text-espresso dark:text-[#D5E3D7]";
+                  } else if (isChosen && !isCorrectOption) {
+                    btnStyle =
+                      "bg-[#F4E6E3] dark:bg-[#32211E] border-terracotta text-terracotta dark:text-[#E5B8AD]";
+                  } else {
+                    btnStyle =
+                      "bg-linen/50 dark:bg-nightDesk border-stoneDesk/50 text-umber/50 opacity-60";
+                  }
+                }
+
+                return (
+                  <button
+                    key={`${option}-${idx}`}
+                    type="button"
+                    disabled={isAnswered}
+                    onClick={() => handleSelectAnswer(option)}
+                    className={`btn-tactile p-4 rounded-xl border-2 text-left flex items-center justify-between gap-3 ${btnStyle}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-7 h-7 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-xs font-semibold flex items-center justify-center shrink-0">
+                        {optionLetter}
+                      </span>
+                      <span className="text-sm font-medium">{option}</span>
+                    </div>
+                    {isAnswered && isCorrectOption && (
+                      <Icons.Check className="w-4 h-4 text-sage shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {selectedOption !== null && (
+              <div className="p-4 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <div className="font-mono text-xs font-semibold text-espresso dark:text-[#EAE4DC]">
+                    {selectedOption === currentQuestion.correctAnswer
+                      ? "✓ JAWABAN TEPAT"
+                      : `✕ KURANG TEPAT — ARTI SEBENARNYA: "${currentQuestion.correctAnswer}"`}
+                  </div>
+                  {currentQuestion.example?.en && (
+                    <p className="text-xs text-umber dark:text-[#B8AFA6] italic">
+                      Contoh: "{currentQuestion.example.en}"
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleNextQuestion}
+                  className="btn-tactile px-5 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs shrink-0"
+                >
+                  {currentQuestionIndex + 1 < quizQuestions.length
+                    ? "Spesimen Berikutnya →"
+                    : "Lihat Hasil Evaluasi →"}
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      /* SUMMARY CARD */
+      return (
+        <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 border-b border-stoneDesk dark:border-nightBorder">
+            <div className="flex items-center gap-4">
+              <ReadingBookCapybara className="w-24 h-24 shrink-0" />
+              <div className="space-y-1">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-sage dark:text-[#98B49E] font-semibold">
+                  LAPORAN EVALUASI SELESAI
+                </span>
+                <h2 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  Skor Akhir: {correctCount} / {quizQuestions.length} ({scorePercentage}%)
+                </h2>
+                <p className="text-xs text-umber dark:text-[#B8AFA6]">
+                  Rekapitulasi pengujian acak dari Laci Katalog Anda.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleStartQuiz(quizQuestions.length)}
+                className="btn-tactile px-4 py-2 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
+              >
+                Ulangi ({quizQuestions.length} Kartu Acak)
+              </button>
+              <button
+                type="button"
+                onClick={handleResetSetup}
+                className="btn-tactile px-4 py-2 rounded-lg bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder text-xs font-medium"
+              >
+                Ubah Jumlah Soal
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-mono text-xs uppercase text-umber dark:text-[#A59C94]">
+              Rincian Jawaban:
+            </h3>
+            <div className="divide-y divide-stoneDesk dark:divide-nightBorder border border-stoneDesk dark:border-nightBorder rounded-xl overflow-hidden">
+              {quizAnswers.map((item, idx) => (
+                <div
+                  key={`${item.question.id}-${idx}`}
+                  className="p-4 bg-parchment dark:bg-nightCard flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-brass">
+                        {String(idx + 1).padStart(2, "0")}.
+                      </span>
+                      <span className="font-serif-editorial font-semibold text-base text-espresso dark:text-[#F5F2EB]">
+                        {item.question.word}
+                      </span>
+                      <span className="font-mono text-xs text-umber dark:text-[#A59C94]">
+                        ({item.question.partOfSpeech})
+                      </span>
+                    </div>
+                    <p className="text-xs text-umber dark:text-[#B8AFA6] pl-6">
+                      Arti tepat:{" "}
+                      <span className="font-medium text-espresso dark:text-[#EAE4DC]">
+                        {item.question.correctAnswer}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="pl-6 sm:pl-0">
+                    {item.isCorrect ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono bg-sageLight dark:bg-[#222D24] text-espresso dark:text-[#BBD0BF] border border-sage/40">
+                        ✓ {item.selected}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono bg-[#F4E6E3] dark:bg-[#32211E] text-terracotta dark:text-[#E5B8AD] border border-terracotta/40">
+                        ✕ {item.selected}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // 10. MAIN APP COMPONENT
+    // ============================================================================
+    function App() {
+      const [activePage, setActivePage] = useState("translator"); // "translator" | "dictionary" | "quiz"
+
+      const [darkMode, setDarkMode] = useState(() => {
+        const savedTheme = SafeStorage.get("wordlens_theme", null);
+        if (savedTheme === "dark") return true;
+        if (savedTheme === "light") return false;
+        return false;
+      });
+
+      useEffect(() => {
+        const rootEl = document.documentElement;
+        if (darkMode) {
+          rootEl.classList.add("dark");
+        } else {
+          rootEl.classList.remove("dark");
+        }
+        SafeStorage.set("wordlens_theme", darkMode ? "dark" : "light");
+      }, [darkMode]);
+
+      const [soundEnabled, setSoundEnabled] = useState(() =>
+        SafeStorage.get("wordlens_sound", true)
+      );
+      useEffect(() => {
+        SafeStorage.set("wordlens_sound", soundEnabled);
+      }, [soundEnabled]);
+
+      // Initialize with 4 curated entries so the Index Card Catalog Drawer is immediately usable
+      const [savedWords, setSavedWords] = useState(() => {
+        const existing = SafeStorage.get("wordlens_dictionary", null);
+        if (existing && Array.isArray(existing) && existing.length > 0) {
+          return existing;
+        }
+        const todayStr = new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+        return [
+          {
+            id: createMeaningId("run", "verb", "berlari"),
+            word: "run",
+            phonetic: "/rʌn/",
+            meaning: "berlari",
+            definition: "To move swiftly on foot at a speed faster than walking.",
+            partOfSpeech: "verb",
+            context: "Physical Movement & Sports",
+            example: MOCK_WORDS["run"].meanings[0].examples[0],
+            dateAdded: todayStr
+          },
+          {
+            id: createMeaningId("break the ice", "idiom", "mencairkan suasana"),
+            word: "break the ice",
+            phonetic: "/breɪk ðə aɪs/",
+            meaning: "mencairkan suasana",
+            definition: "To do or say something to relieve tension or awkwardness when people meet for the first time.",
+            partOfSpeech: "idiom",
+            context: "Social Interaction & Meetings",
+            example: MOCK_WORDS["break the ice"].meanings[0].examples[0],
+            dateAdded: todayStr
+          },
+          {
+            id: createMeaningId("light", "adjective", "ringan"),
+            word: "light",
+            phonetic: "/laɪt/",
+            meaning: "ringan",
+            definition: "Of little weight; not heavy and easy to lift or carry.",
+            partOfSpeech: "adjective",
+            context: "Weight & Physical Properties",
+            example: MOCK_WORDS["light"].meanings[1].examples[0],
+            dateAdded: todayStr
+          },
+          {
+            id: createMeaningId("resilient", "adjective", "tangguh / cepat pulih"),
+            word: "resilient",
+            phonetic: "/rɪˈzɪliənt/",
+            meaning: "tangguh / cepat pulih",
+            definition: "Able to withstand or recover quickly from difficult conditions or setbacks.",
+            partOfSpeech: "adjective",
+            context: "Psychology & Character",
+            example: MOCK_WORDS["resilient"].meanings[0].examples[0],
+            dateAdded: todayStr
+          }
+        ];
+      });
+
+      useEffect(() => {
+        SafeStorage.set("wordlens_dictionary", savedWords);
+      }, [savedWords]);
+
+      const [searchHistory, setSearchHistory] = useState(() =>
+        SafeStorage.get("wordlens_history", ["run", "break the ice", "resilient", "light"])
+      );
+      useEffect(() => {
+        SafeStorage.set("wordlens_history", searchHistory);
+      }, [searchHistory]);
+
+      const [translatorQuery, setTranslatorQuery] = useState("run");
+      const [isLoading, setIsLoading] = useState(false);
+      const [searchResult, setSearchResult] = useState(MOCK_WORDS["run"]);
+      const [hasSearched, setHasSearched] = useState(true);
+      const [lastSearchedTerm, setLastSearchedTerm] = useState("run");
+
+      const [mascotState, setMascotState] = useState("idle");
+      const [isSpeaking, setIsSpeaking] = useState(false);
+
+      const [toast, setToast] = useState(null);
+      const toastTimerRef = useRef(null);
+
+      const showToast = useCallback((message, code = "ARC") => {
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        setToast({ message, code });
+        toastTimerRef.current = setTimeout(() => {
+          setToast(null);
+        }, 3100);
+      }, []);
+
+      const handlePerformSearch = useCallback(async (rawQuery) => {
+        const cleaned = (rawQuery || "").trim();
+        if (!cleaned) return;
+
+        setTranslatorQuery(cleaned);
+        setLastSearchedTerm(cleaned);
+        setHasSearched(true);
+        setIsLoading(true);
+        setMascotState("processing");
+
+        setSearchHistory((prev) => {
+          const filtered = prev.filter((item) => item.toLowerCase() !== cleaned.toLowerCase());
+          return [cleaned, ...filtered].slice(0, 10);
+        });
+
+        try {
+          const data = await searchWord(cleaned);
+          setSearchResult(data);
+        } catch (err) {
+          setSearchResult(null);
+        } finally {
+          setIsLoading(false);
+          setMascotState("idle");
+        }
+      }, []);
+
+      const handleQuickSearch = useCallback(
+        (wordToSearch) => {
+          ArchivalAudio.playKeyClick(soundEnabled);
+          setActivePage("translator");
+          handlePerformSearch(wordToSearch);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+        [handlePerformSearch, soundEnabled]
+      );
+
+      const handleClearHistory = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setSearchHistory([]);
+        showToast("Riwayat penelusuran telah dibersihkan.", "LOG");
+      };
+
+      const isMeaningSaved = useCallback(
+        (word, partOfSpeech, translation) => {
+          const targetId = createMeaningId(word, partOfSpeech, translation);
+          return savedWords.some((item) => item.id === targetId);
+        },
+        [savedWords]
+      );
+
+      const handleSaveMeaning = (word, phonetic, meaningObj) => {
+        const entryId = createMeaningId(word, meaningObj.partOfSpeech, meaningObj.translation);
+        const exists = savedWords.some((item) => item.id === entryId);
+
+        if (exists) {
+          ArchivalAudio.playKeyClick(soundEnabled);
+          showToast(`Entri "${word}" (${meaningObj.translation}) sudah tercatat di katalog.`, "INFO");
+          return;
+        }
+
+        const newEntry = {
+          id: entryId,
+          word,
+          phonetic,
+          meaning: meaningObj.translation,
+          definition: meaningObj.definition,
+          partOfSpeech: meaningObj.partOfSpeech,
+          context: meaningObj.context,
+          example: meaningObj.examples?.[0] || { en: "", id: "" },
+          dateAdded: new Date().toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+          })
+        };
+
+        setSavedWords((prev) => [newEntry, ...prev]);
+        setMascotState("celebrating");
+        setTimeout(() => setMascotState("idle"), 1200);
+
+        ArchivalAudio.playBellChord(soundEnabled);
+        showToast(
+          `Kartu "${word}" → "${meaningObj.translation}" berhasil diarsipkan ke Laci Katalog.`,
+          "STAMP"
+        );
+      };
+
+      const handleDeleteWord = (id, wordLabel) => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setSavedWords((prev) => prev.filter((item) => item.id !== id));
+        showToast(`Kartu "${wordLabel}" dikeluarkan dari Laci Katalog.`, "DEL");
+      };
+
+      const handleLoadStarterWords = () => {
+        const starterList = [
+          { w: "run", mIdx: 0 },
+          { w: "run", mIdx: 1 },
+          { w: "light", mIdx: 1 },
+          { w: "break the ice", mIdx: 0 },
+          { w: "give up", mIdx: 0 },
+          { w: "piece of cake", mIdx: 0 },
+          { w: "resilient", mIdx: 0 }
+        ];
+
+        const todayStr = new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+
+        let addedCount = 0;
+        const newEntries = [];
+
+        starterList.forEach(({ w, mIdx }) => {
+          const wordData = MOCK_WORDS[w];
+          if (!wordData) return;
+          const m = wordData.meanings[mIdx];
+          const entryId = createMeaningId(wordData.word, m.partOfSpeech, m.translation);
+          const alreadyExists = savedWords.some((item) => item.id === entryId);
+          if (!alreadyExists) {
+            addedCount++;
+            newEntries.push({
+              id: entryId,
+              word: wordData.word,
+              phonetic: wordData.phonetic,
+              meaning: m.translation,
+              definition: m.definition,
+              partOfSpeech: m.partOfSpeech,
+              context: m.context,
+              example: m.examples[0],
+              dateAdded: todayStr
+            });
+          }
+        });
+
+        if (addedCount > 0) {
+          ArchivalAudio.playBellChord(soundEnabled);
+          setSavedWords((prev) => [...newEntries, ...prev]);
+          showToast(`${addedCount} kartu spesimen berhasil ditambahkan ke Laci Katalog.`, "CAT");
+        } else {
+          ArchivalAudio.playKeyClick(soundEnabled);
+          showToast("Seluruh kartu spesimen contoh sudah ada di Laci Katalog.", "INFO");
+        }
+      };
+
+      const handlePronounce = useCallback(
+        (textToSpeak) => {
+          ArchivalAudio.playKeyClick(soundEnabled);
+          if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+            showToast(`Melafalkan: "${textToSpeak}" (en-US)`, "AUDIO");
+            return;
+          }
+
+          try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = "en-US";
+            utterance.rate = 0.92;
+
+            utterance.onstart = () => setIsSpeaking(true);
+            utterance.onend = () => setIsSpeaking(false);
+            utterance.onerror = () => setIsSpeaking(false);
+
+            window.speechSynthesis.speak(utterance);
+          } catch (err) {
+            setIsSpeaking(false);
+            showToast(`Melafalkan "${textToSpeak}"`, "AUDIO");
+          }
+        },
+        [showToast, soundEnabled]
+      );
+
+      const handleGreetArchivist = () => {
+        ArchivalAudio.playBellChord(soundEnabled);
+        setMascotState("celebrating");
+        setTimeout(() => setMascotState("idle"), 1100);
+        showToast(
+          "Kapi merapikan kacamata bacanya dan menyeruput kopi hangat. Selamat menelaah kosakata.",
+          "KAPI"
+        );
+      };
+
+      const navItems = [
+        { id: "translator", label: "Meja Leksikon", code: "01" },
+        { id: "dictionary", label: "Laci Katalog", code: "02", badge: savedWords.length },
+        { id: "quiz", label: "Uji Ingatan", code: "03" }
+      ];
+
+      return (
+        <div className="min-h-screen flex flex-col bg-linen dark:bg-nightDesk">
+          {/* =================================================================== */}
+          {/* ARCHIVAL HEADER WITH DISTINCT STONE/WALNUT SURFACE CONTRAST         */}
+          {/* =================================================================== */}
+          <header className="sticky top-0 z-40 backdrop-blur-md bg-[#E8E3D9]/95 dark:bg-[#1E1B18]/95 border-b-2 border-[#CFC7B8] dark:border-nightBorder transition-colors">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+              {/* Brand Masthead with Scholarly Capybara Emblem (No Oranges) */}
+              <button
+                type="button"
+                onClick={() => {
+                  ArchivalAudio.playKeyClick(soundEnabled);
+                  setActivePage("translator");
+                }}
+                className="btn-tactile flex items-center gap-3 text-left focus:outline-none"
+              >
+                <div className="w-11 h-11 rounded-xl bg-[#F6F0E2] dark:bg-nightDesk border border-espresso/30 dark:border-brass/50 flex items-center justify-center shadow-sm overflow-hidden">
+                  {/* Gambar 1: Minimalist Capybara Soaking in Water Ripples Logo */}
+                  <svg viewBox="0 0 64 52" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Capybara Silhouette Facing Left */}
+                    <path
+                      d="M15 20 C15 16.5 18 15 21.5 14 L27 12.5 C27 9.5 29.5 9.5 30 12 C31 10 33.5 10.5 33 13.5 C34.5 16 36.5 20 39 21.5 C45 22.5 49 25.5 50 32.5 C42 35.5 28 35.5 22.5 32.5 L21.5 27.5 L17.5 26.5 C15.2 26 14.5 23.5 15 20 Z"
+                      fill="#3D2314"
+                      className="dark:fill-[#EAE4DC]"
+                    />
+                    {/* Slit Eye */}
+                    <path
+                      d="M25.5 16.5 L29.8 18"
+                      stroke="#F6F0E2"
+                      className="dark:stroke-[#151311]"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                    />
+                    {/* Inner Water Ripple Arcs */}
+                    <path
+                      d="M20.5 30.2 C16.5 32 18.5 36.2 33 36.8"
+                      stroke="#3D2314"
+                      className="dark:stroke-[#EAE4DC]"
+                      strokeWidth="2.3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M51 30.2 C55 32 52 36.2 38.5 36.7"
+                      stroke="#3D2314"
+                      className="dark:stroke-[#EAE4DC]"
+                      strokeWidth="2.3"
+                      strokeLinecap="round"
+                    />
+                    {/* Outer Water Ripple Segments */}
+                    <path
+                      d="M16.5 35.2 C19.5 37.5 24 38.5 27.5 39"
+                      stroke="#3D2314"
+                      className="dark:stroke-[#EAE4DC]"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M30.5 39.8 C35 40.2 40 40.2 45 39.5"
+                      stroke="#3D2314"
+                      className="dark:stroke-[#EAE4DC]"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M48.5 38.5 C51.5 37.5 53.5 36.2 54.8 34.8"
+                      stroke="#3D2314"
+                      className="dark:stroke-[#EAE4DC]"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-serif-editorial font-bold tracking-tight text-espresso dark:text-[#F5F2EB]">
+                      WordLens
+                    </span>
+                    <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-parchment dark:bg-nightDesk font-mono text-[10px] text-umber dark:text-[#C8A97E] border border-stoneDesk dark:border-nightBorder">
+                      CAPYBARA ARCHIVE
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-umber dark:text-[#A59C94] -mt-0.5">
+                    Monograf Kosakata & Katalog Indeks
+                  </p>
+                </div>
+              </button>
+
+              {/* Center Navigation Tabs */}
+              <nav className="flex items-center gap-1.5 bg-linen/90 dark:bg-nightDesk p-1 rounded-xl border border-[#CFC7B8] dark:border-nightBorder order-3 md:order-2 w-full md:w-auto justify-center">
+                {navItems.map((item) => {
+                  const isActive = activePage === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        ArchivalAudio.playKeyClick(soundEnabled);
+                        setActivePage(item.id);
+                      }}
+                      className={`btn-tactile px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                        isActive
+                          ? "bg-espresso text-parchment dark:bg-[#EAE4DC] dark:text-espresso shadow-sm"
+                          : "text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white"
+                      }`}
+                    >
+                      <span className="font-mono text-[10px] opacity-65">{item.code}.</span>
+                      <span>{item.label}</span>
+                      {typeof item.badge === "number" && (
+                        <span
+                          className={`px-1.5 py-0.2 rounded font-mono text-[10px] ${
+                            isActive
+                              ? "bg-parchment/20 text-parchment dark:bg-espresso/15 dark:text-espresso"
+                              : "bg-stoneDesk dark:bg-nightCard text-espresso dark:text-[#D9C7B0]"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Right Controls: Audio Toggle & Lampu Baca (Dark Mode) */}
+              <div className="flex items-center gap-2 order-2 md:order-3">
+                <button
+                  type="button"
+                  onClick={() => setSoundEnabled((prev) => !prev)}
+                  className={`btn-tactile px-2.5 py-1.5 rounded-lg border font-mono text-[11px] flex items-center gap-1.5 ${
+                    soundEnabled
+                      ? "bg-parchment dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border-[#B5AC99] dark:border-nightBorder"
+                      : "bg-linen/50 dark:bg-nightDesk/50 text-umber/50 border-stoneDesk dark:border-nightBorder"
+                  }`}
+                  title={soundEnabled ? "Suara Ketikan & Lonceng Meja: Aktif" : "Suara: Nonaktif"}
+                >
+                  <span>{soundEnabled ? "♦ Suara Aktif" : "♢ Bisu"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    ArchivalAudio.playKeyClick(soundEnabled);
+                    setDarkMode((prev) => !prev);
+                  }}
+                  className="btn-tactile px-3 py-1.5 rounded-lg bg-parchment dark:bg-nightDesk border border-[#B5AC99] dark:border-nightBorder text-espresso dark:text-[#C8A97E] text-xs font-medium inline-flex items-center gap-1.5"
+                  title={darkMode ? "Beralih ke Kertas Terang" : "Beralih ke Mode Baca Malam"}
+                >
+                  {darkMode ? <Icons.Sun className="w-3.5 h-3.5" /> : <Icons.Moon className="w-3.5 h-3.5" />}
+                  <span className="hidden sm:inline">{darkMode ? "Siang" : "Malam"}</span>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* =================================================================== */}
+          {/* TOP-CENTER ARCHIVAL TOAST NOTIFICATION                              */}
+          {/* =================================================================== */}
+          {toast && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="fixed top-20 inset-x-0 mx-auto z-50 max-w-md px-4 pointer-events-none"
+            >
+              <div className="pointer-events-auto px-4 py-3 rounded-xl shadow-index-card bg-espresso text-parchment dark:bg-[#EAE4DC] dark:text-espresso border border-brass text-xs font-medium flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-1.5 py-0.5 rounded bg-brass/25 font-mono text-[10px] font-semibold">
+                    [{toast.code}]
+                  </span>
+                  <span className="leading-snug">{toast.message}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setToast(null)}
+                  className="opacity-70 hover:opacity-100 font-mono text-xs px-1"
+                  aria-label="Tutup pemberitahuan"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* =================================================================== */}
+          {/* MAIN WORKSPACE CONTENT                                              */}
+          {/* =================================================================== */}
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-7">
+            {activePage === "translator" && (
+              <LexiconDeskView
+                query={translatorQuery}
+                setQuery={setTranslatorQuery}
+                onSearch={handlePerformSearch}
+                isLoading={isLoading}
+                result={searchResult}
+                hasSearched={hasSearched}
+                lastSearchedTerm={lastSearchedTerm}
+                searchHistory={searchHistory}
+                onClearHistory={handleClearHistory}
+                savedWords={savedWords}
+                onSaveMeaning={handleSaveMeaning}
+                isMeaningSaved={isMeaningSaved}
+                onPronounce={handlePronounce}
+                isSpeaking={isSpeaking}
+                mascotState={mascotState}
+                setMascotState={setMascotState}
+                onNavigate={setActivePage}
+                onLoadStarterWords={handleLoadStarterWords}
+                soundEnabled={soundEnabled}
+                onGreetArchivist={handleGreetArchivist}
+              />
+            )}
+
+            {activePage === "dictionary" && (
+              <CatalogArchiveView
+                savedWords={savedWords}
+                onDeleteWord={handleDeleteWord}
+                onPronounce={handlePronounce}
+                onNavigate={setActivePage}
+                onQuickSearch={handleQuickSearch}
+                onLoadStarterWords={handleLoadStarterWords}
+                soundEnabled={soundEnabled}
+              />
+            )}
+
+            {activePage === "quiz" && (
+              <RecallExaminationView
+                savedWords={savedWords}
+                onPronounce={handlePronounce}
+                onNavigate={setActivePage}
+                onLoadStarterWords={handleLoadStarterWords}
+                soundEnabled={soundEnabled}
+              />
+            )}
+          </main>
+
+          {/* =================================================================== */}
+          {/* EDITORIAL FOOTER                                                    */}
+          {/* =================================================================== */}
+          <footer className="mt-12 border-t border-stoneDesk dark:border-nightBorder py-6 text-xs text-umber dark:text-[#8C827A]">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <span className="font-serif-editorial italic">
+                WordLens — The Capybara Archivist's Contextual Lexicon & Card Catalog
+              </span>
+              <span className="font-mono text-[11px]">
+                EN-US AUDIO • 3D INDEX CARDS • LOCAL ARCHIVE
+              </span>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>

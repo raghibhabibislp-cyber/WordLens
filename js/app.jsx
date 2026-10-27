@@ -1,217 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WordLens — Catatan Leksikon & Katalog Pustaka Capybara</title>
-
-  <!-- Google Fonts: Newsreader (Editorial Serif), Plus Jakarta Sans (Clean UI), JetBrains Mono (Catalog Metadata) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- React 18 & Babel CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            linen: '#F5F2EB',
-            parchment: '#FCFBF7',
-            stoneDesk: '#E8E3D9',
-            espresso: '#221E1C',
-            umber: '#605851',
-            sage: '#4A5D4E',
-            sageLight: '#E4ECE5',
-            riverSlate: '#475863',
-            slateLight: '#E3EAEF',
-            terracotta: '#8F5343',
-            brass: '#9E7B4F',
-            nightDesk: '#151311',
-            nightCard: '#1E1B18',
-            nightBorder: '#312C27'
-          },
-          fontFamily: {
-            serif: ['Newsreader', 'Georgia', ' Cambria', 'serif'],
-            sans: ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
-            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace']
-          },
-          boxShadow: {
-            'archival': '0 4px 20px -2px rgba(34, 30, 28, 0.06), 0 1px 4px -1px rgba(34, 30, 28, 0.04)',
-            'index-card': '0 8px 24px -4px rgba(34, 30, 28, 0.08), 0 2px 6px -1px rgba(34, 30, 28, 0.05)',
-            'tactile': '0 2px 0 0 #221E1C'
-          }
-        }
-      }
-    };
-  </script>
-
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background-color: #F5F2EB;
-      color: #221E1C;
-      overflow-x: hidden;
-    }
-
-    .font-serif-editorial {
-      font-family: 'Newsreader', Georgia, serif;
-    }
-
-    /* Subtle tactile button response (Calm, measured, non-cartoonish) */
-    .btn-tactile {
-      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
-    }
-    .btn-tactile:hover:not(:disabled) {
-      transform: translateY(-1px);
-    }
-    .btn-tactile:active:not(:disabled) {
-      transform: translateY(1px);
-    }
-
-    /* 3D Library Index Card Flip */
-    .perspective-1000 {
-      perspective: 1000px;
-    }
-    .flip-card-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      transform-style: preserve-3d;
-    }
-    .flip-card-inner.is-flipped {
-      transform: rotateY(180deg);
-    }
-    .flip-card-front,
-    .flip-card-back {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      border-radius: 14px;
-    }
-    .flip-card-back {
-      transform: rotateY(180deg);
-    }
-
-    /* Ruled lines for authentic Library Index Card feel */
-    .ruled-card-bg {
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent,
-        transparent 27px,
-        rgba(158, 123, 79, 0.12) 28px
-      );
-    }
-    .dark .ruled-card-bg {
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent,
-        transparent 27px,
-        rgba(200, 169, 126, 0.08) 28px
-      );
-    }
-
-    @keyframes subtleSteam {
-      0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.55; }
-      50% { transform: translateY(-4px) translateX(2px); opacity: 0.85; }
-    }
-    @keyframes lensScan {
-      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
-      50% { transform: translate(-3px, -2px) rotate(-5deg); }
-    }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes capyPlayfulIdle {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-2.5px); }
-    }
-    @keyframes orangeIdleBob {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-3.5px) rotate(2deg); }
-    }
-    @keyframes capyHappyJump {
-      0% { transform: translateY(0) scale(1, 1); }
-      20% { transform: translateY(3px) scale(1.06, 0.93); }
-      45% { transform: translateY(-14px) scale(0.96, 1.05) rotate(-2deg); }
-      70% { transform: translateY(2px) scale(1.03, 0.97); }
-      85% { transform: translateY(-4px) scale(0.99, 1.01); }
-      100% { transform: translateY(0) scale(1, 1); }
-    }
-    @keyframes orangeHighBounce {
-      0% { transform: translateY(0) rotate(0deg); }
-      20% { transform: translateY(3px) rotate(-4deg); }
-      50% { transform: translateY(-28px) rotate(14deg) scale(1.08); }
-      75% { transform: translateY(1px) rotate(-6deg) scale(1.04, 0.92); }
-      90% { transform: translateY(-8px) rotate(4deg); }
-      100% { transform: translateY(0) rotate(0deg); }
-    }
-    @keyframes zzzFloat {
-      0%, 100% { transform: translateY(0px); opacity: 0.75; }
-      50% { transform: translateY(-3px); opacity: 1; }
-    }
-
-    .animate-steam {
-      animation: subtleSteam 3.2s ease-in-out infinite;
-    }
-    .animate-lens-scan {
-      animation: lensScan 1.8s ease-in-out infinite;
-      transform-origin: center center;
-    }
-    .animate-fade-slide {
-      animation: fadeSlide 0.25s ease-out forwards;
-    }
-    .animate-capy-idle {
-      animation: capyPlayfulIdle 2.6s ease-in-out infinite;
-    }
-    .animate-orange-idle {
-      animation: orangeIdleBob 2.6s ease-in-out infinite;
-    }
-    .animate-capy-jump {
-      animation: capyHappyJump 0.68s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .animate-orange-jump {
-      animation: orangeHighBounce 0.68s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .animate-zzz {
-      animation: zzzFloat 2.8s ease-in-out infinite;
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(96, 88, 81, 0.08);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(96, 88, 81, 0.28);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(96, 88, 81, 0.45);
-    }
-  </style>
-</head>
-
-<body class="bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] antialiased transition-colors duration-300 min-h-screen selection:bg-sage selection:text-white">
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================================
     // 1. SAFE STORAGE WRAPPER & ARCHIVAL TACTILE AUDIO (Typewriter & Page Rustle)
@@ -790,17 +577,17 @@
     // Tier Indicator using Nib / Roman Numeral Stamp (Strictly NO fruit/orange icons)
     function TierStampBadge({ tier = 1 }) {
       const roman = { 1: "I", 2: "II", 3: "III" };
-      const labels = { 1: "Dasar", 2: "Kontekstual", 3: "Idiomatik" };
+      const labels = { 1: "Foundation", 2: "Contextual", 3: "Idiomatic" };
       return (
         <span
-          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-[11px] font-medium text-umber dark:text-[#B8AFA6]"
-          title={`Tingkat Leksikon ${roman[tier]}: ${labels[tier]}`}
+          className="inline-flex shrink-0 items-center gap-1.5 px-2.5 py-0.5 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-[11px] font-medium whitespace-nowrap text-umber dark:text-[#B8AFA6]"
+          title={`Lexicon tier ${roman[tier]}: ${labels[tier]}`}
         >
-          <span className="text-brass dark:text-[#C8A97E] font-semibold">
+          <span className="text-brass-ink dark:text-[#C8A97E] font-semibold">
             TIER {roman[tier] || "I"}
           </span>
           <span className="opacity-40">•</span>
-          <span>{labels[tier] || "Dasar"}</span>
+          <span>{labels[tier] || "Foundation"}</span>
         </span>
       );
     }
@@ -810,20 +597,20 @@
     // ============================================================================
     const Icons = {
       Search: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
       ),
       Speaker: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
           <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
         </svg>
       ),
       Mic: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
           <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
           <line x1="12" y1="19" x2="12" y2="23" />
@@ -831,23 +618,23 @@
         </svg>
       ),
       Bookmark: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>
       ),
       Check: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       ),
       Trash: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="3 6 5 6 21 6" />
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
         </svg>
       ),
       Sun: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="5" />
           <line x1="12" y1="1" x2="12" y2="3" />
           <line x1="12" y1="21" x2="12" y2="23" />
@@ -860,28 +647,28 @@
         </svg>
       ),
       Moon: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
       ),
       ChevronLeft: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 18 9 12 15 6" />
         </svg>
       ),
       ChevronRight: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       ),
       FlipCard: ({ className = "w-3.5 h-3.5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
           <path d="M3 3v5h5" />
         </svg>
       ),
       SwitchDir: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M7 16V4M7 4L3 8M7 4L11 8" />
           <path d="M17 8v12m0 0l4-4m-4 4l-4-4" />
         </svg>
@@ -906,12 +693,14 @@
       };
 
       return (
-        <div
+        <button
+          type="button"
           onClick={handleClick}
-          className={`relative select-none cursor-pointer group ${className}`}
-          title="Kapi — Klik untuk melompat gembira!"
+          className={`relative block select-none cursor-pointer group bg-transparent border-0 p-0 ${className}`}
+          title="Kapi — Click to make him jump with joy!"
+          aria-label="Kapi the capybara — greet the archivist"
         >
-          <svg
+          <svg aria-hidden="true" focusable="false"
             viewBox="0 0 160 150"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -1063,19 +852,22 @@
               />
             </g>
           </svg>
-        </div>
+        </button>
       );
     }
 
     /**
      * SleepingBookCapybara (Gambar 3):
      * Capybara sleeping peacefully on an open book with floating "Zzz" letters,
-     * used in the "Ruang Uji Ingatan" setup & empty states.
+     * used in the recall room setup & empty states.
      */
     function SleepingBookCapybara({ className = "w-28 h-28" }) {
       return (
-        <div className={`relative select-none flex items-center justify-center ${className}`}>
-          <svg
+        <div
+          className={`relative select-none flex items-center justify-center ${className}`}
+          aria-hidden="true"
+        >
+          <svg aria-hidden="true" focusable="false"
             viewBox="0 0 220 200"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -1243,295 +1035,81 @@
     }
 
     /**
-     * ReadingBookCapybara (Gambar 4 - 100% Exact Match):
-     * Used in "Ruang Evaluasi" / active quiz & summary.
-     * Renders the exact provided image with a 1:1 pixel-traced 507x449 vector fallback.
+     * ReadingBookCapybara:
+     * Uses the supplied capybara reading artwork exactly as-is. The base image
+     * is never redrawn, cropped, or recolored; all life comes from wrapper
+     * transforms plus a few small overlay ornaments for correct and incorrect
+     * answers.
      */
-    function ReadingBookCapybara({ className = "w-28 h-28" }) {
-      const [imgFailed, setImgFailed] = useState(false);
+    function ReadingBookCapybara({ className = "w-28 h-28", mood = "idle" }) {
+      const moodClass =
+        mood === "correct" ? "is-correct" : mood === "incorrect" ? "is-incorrect" : "is-idle";
 
       return (
-        <div className={`relative select-none flex items-center justify-center ${className}`}>
-          {!imgFailed ? (
+        <div
+          className={`capy-reader relative select-none flex items-center justify-center ${moodClass} ${className}`}
+          aria-hidden="true"
+        >
+          <span className="capy-reader__halo" aria-hidden="true" />
+          <span className="capy-reader__burst" aria-hidden="true" />
+
+          <div className="capy-reader__scene">
             <img
-              src="Gemini_Generated_Image_o10ie7o10ie7o10i-removebg-preview.png"
-              alt="Capybara membaca buku"
-              onError={() => setImgFailed(true)}
-              className="w-full h-full object-contain"
+              src="assets/capybara-reading.png"
+              alt=""
+              width="537"
+              height="465"
+              className="capy-reader__image"
+              draggable="false"
+              decoding="async"
             />
-          ) : (
+
+            {/* Warm sparkles for a correct answer */}
             <svg
-              viewBox="0 0 507 449"
+              className="capy-reader__sparkles"
+              aria-hidden="true"
+              focusable="false"
+              viewBox="0 0 200 200"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full h-full overflow-visible"
             >
-              {/* Back Left Ear */}
-              <path
-                d="M223 47 C229 27 245 17 256 19 C265 21 266 32 263 42 Z"
-                fill="#744B32"
-                stroke="#0B0908"
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Main Capybara Body Base (#EA9B56) */}
-              <path
-                d="M166 82 C180 65 204 51 223 47 C248 41 276 41 301 47 C315 51 329 59 337 70 C368 118 399 182 417 250 C427 291 427 336 414 369 C401 401 373 414 320 415 C265 418 214 416 184 409 C159 390 151 356 156 325 C150 250 145 135 166 82 Z"
-                fill="#EA9B56"
-              />
-
-              {/* Body Shading: Under Chin, Chest, Belly & Inner Back Crescent (#C97E43) */}
-              <path
-                d="M166 205 C212 212 268 205 299 187 C305 206 303 226 289 246 L266 257 L278 307 C295 307 316 302 332 294 C338 318 336 340 326 351 C303 349 286 367 278 396 L256 415 C224 415 198 412 184 409 C160 390 154 358 158 332 Z"
-                fill="#C97E43"
-              />
-              {/* Right Rump / Back Shading Crescent */}
-              <path
-                d="M401 198 C417 265 415 335 388 377 C372 399 348 409 320 415 C364 414 398 402 414 369 C427 336 427 291 417 250 C412 232 407 215 401 198 Z"
-                fill="#C97E43"
-              />
-
-              {/* Dark Brown Snout Patch (#915F40) */}
-              <path
-                d="M146 128 C149 109 165 98 184 103 C213 111 229 144 229 179 C229 194 226 205 219 212 C196 222 171 224 152 208 C140 192 138 156 146 128 Z"
-                fill="#915F40"
-              />
-
-              {/* Head & Body Outer Black Stroke */}
-              <path
-                d="M166 82 C180 65 204 51 223 47 C248 41 276 41 301 47 M337 70 C368 118 399 182 417 250 C427 291 427 336 414 369 C401 401 373 414 320 415 M146 128 C139 156 140 189 152 208 M158 332 C156 355 162 385 184 409"
-                stroke="#0B0908"
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Right Ear (Outer Rim & Dark Inner Ear) */}
-              <path
-                d="M297 63 C301 41 317 22 335 23 C349 24 355 40 347 57 C342 67 331 73 321 74"
-                fill="#EA9B56"
-                stroke="#0B0908"
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M312 65 C315 46 327 34 340 36 C348 37 350 48 344 58 C339 66 330 71 321 72 Z"
-                fill="#744B32"
-              />
-              <path
-                d="M312 65 C315 46 327 34 340 36"
-                stroke="#0B0908"
-                strokeWidth="7.5"
-                strokeLinecap="round"
-              />
-
-              {/* Nostrils & Mouth */}
-              <path
-                d="M148 142 C153 144 156 148 156 153 M189 141 C182 142 177 146 176 152 M164 159 L167 193 M156 204 L167 193 L179 201"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Under-Chin Crease Line */}
-              <path
-                d="M255 212 C264 210 272 207 277 204"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-              />
-
-              {/* Serious Focused Eye (Right of Glasses) */}
-              <path
-                d="M258 96 L279 90 C280 99 275 106 266 106 C260 106 257 101 258 96 Z"
-                fill="#0B0908"
-              />
-              <path
-                d="M254 97 L283 88"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-              />
-
-              {/* Left Eyeglass Lens (with Snout Overlap & White Reflection) */}
-              <g>
-                <circle cx="154" cy="104" r="26" fill="#E8F3F8" />
-                {/* Snout visible through lower-right of left lens */}
-                <path
-                  d="M150 130 C166 130 179 118 180 102 C166 102 154 113 150 130 Z"
-                  fill="#B89B87"
-                />
-                {/* Crisp white lens highlight */}
-                <path
-                  d="M142 82 L169 124 L158 128 L133 89 Z"
-                  fill="#FFFFFF"
-                />
-                <circle
-                  cx="154"
-                  cy="104"
-                  r="26"
-                  stroke="#0B0908"
-                  strokeWidth="8.5"
-                />
+              <g fill="#C8A97E">
+                <path d="M31 14L33.5 22L41 24.5L33.5 27L31 35L28.5 27L21 24.5L28.5 22Z" />
+                <path d="M168 6L170 12L176 14L170 16L168 22L166 16L160 14L166 12Z" />
+                <path d="M183 43L184.5 48L189.5 49.5L184.5 51L183 56L181.5 51L176.5 49.5L181.5 48Z" />
               </g>
-
-              {/* Right Eyeglass Lens (Warm Tint + Snout Overlap + Twin White Shine Stripes) */}
-              <g>
-                <circle cx="216" cy="109" r="26" fill="#F6DEC0" />
-                {/* Snout overlap on bottom-left of right lens */}
-                <path
-                  d="M190 109 C190 123 201 134 215 135 C215 119 205 108 190 109 Z"
-                  fill="#C19676"
-                />
-                {/* Diagonal White Reflection Stripes */}
-                <line
-                  x1="203"
-                  y1="89"
-                  x2="230"
-                  y2="128"
-                  stroke="#FFFFFF"
-                  strokeWidth="9"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="215"
-                  y1="87"
-                  x2="237"
-                  y2="119"
-                  stroke="#FFFFFF"
-                  strokeWidth="4.5"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="216"
-                  cy="109"
-                  r="26"
-                  stroke="#0B0908"
-                  strokeWidth="8.5"
-                />
+              <g fill="#9E7B4F" opacity="0.8">
+                <circle cx="180" cy="28" r="1.8" />
+                <circle cx="24" cy="47" r="1.5" />
+                <circle cx="157" cy="20" r="1.2" />
               </g>
+            </svg>
 
-              {/* Glasses Bridge */}
+            {/* A sympathetic sweat bead for a miss */}
+            <svg
+              className="capy-reader__sweat"
+              aria-hidden="true"
+              focusable="false"
+              viewBox="0 0 24 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
-                d="M179 102 C183 100 187 100 191 103"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-              />
-
-              {/* Open Book: White Top Pages Spread */}
-              <path
-                d="M84 205 C109 201 135 212 150 232 C173 213 211 203 244 206 L257 212 L166 241 L147 241 Z"
-                fill="#FFFFFF"
-                stroke="#0B0908"
-                strokeWidth="8.5"
+                d="M12 1.5C12 1.5 3.5 12.2 3.5 19.4C3.5 24.6 7.3 29 12 29C16.7 29 20.5 24.6 20.5 19.4C20.5 12.2 12 1.5 12 1.5Z"
+                fill="#A9CAD9"
+                stroke="#475863"
+                strokeWidth="2"
                 strokeLinejoin="round"
               />
-              {/* Inner Page Crease Lines */}
               <path
-                d="M102 209 C121 213 138 221 150 232 C177 219 212 212 245 212"
-                stroke="#0B0908"
-                strokeWidth="6.5"
+                d="M8.2 20C8.2 17.5 9.6 15.1 11.5 12.9"
+                stroke="#FFFFFF"
+                strokeWidth="1.8"
                 strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Open Book: Powder-Blue Hardcover (#A7C9D9) */}
-              <path
-                d="M87 210 L147 241 L166 241 L257 212 L285 319 L181 346 C173 350 165 349 160 342 L125 319 Z"
-                fill="#A7C9D9"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinejoin="round"
-              />
-              {/* Book Spine Vertical Lines */}
-              <line
-                x1="147"
-                y1="241"
-                x2="160"
-                y2="342"
-                stroke="#0B0908"
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-              <line
-                x1="166"
-                y1="241"
-                x2="181"
-                y2="346"
-                stroke="#0B0908"
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-
-              {/* Left Paw Gripping Left Edge of Book */}
-              <path
-                d="M111 253 C95 251 89 265 101 272 C90 276 92 291 105 292 C99 299 106 309 121 303 L111 253 Z"
-                fill="#825539"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Right Arm & Brown Paw Gripping Right Edge of Book */}
-              <path
-                d="M306 238 C293 249 278 256 263 257 C242 255 232 260 233 268 C234 272 242 273 250 273 C232 274 225 280 229 288 C232 292 241 292 249 291 C236 294 233 302 241 307 C254 311 292 311 352 286 Z"
-                fill="#EA9B56"
-              />
-              {/* Brown Paw Tips on Right Hand */}
-              <path
-                d="M277 255 C258 256 233 257 233 268 C234 272 242 273 250 273 C232 274 225 280 229 288 C232 292 241 292 249 291 C236 294 233 302 241 307 C252 310 268 310 283 307 C287 290 285 270 277 255 Z"
-                fill="#825539"
-              />
-              <path
-                d="M306 238 C293 249 278 256 263 257 C242 255 232 260 233 268 C234 272 242 273 250 273 C232 274 225 280 229 288 C232 292 241 292 249 291 C236 294 233 302 241 307 C254 311 292 311 352 286"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Left Hind Foot (Bottom Left) */}
-              <path
-                d="M140 381 C143 363 133 351 122 359 C117 349 102 351 103 365 C91 361 84 372 95 382 C104 398 116 411 127 415 L191 409 L162 377 Z"
-                fill="#825539"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Right Hind Leg Crease Arc */}
-              <path
-                d="M278 396 C291 360 321 344 352 352 C361 355 368 361 373 368"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-              />
-
-              {/* Right Hind Foot (Bottom Center-Right) */}
-              <path
-                d="M282 392 C287 375 281 361 268 366 C265 354 249 354 247 369 C234 365 227 377 238 389 C246 409 255 428 265 435 C274 440 285 436 320 415 L292 392 Z"
-                fill="#C97E43"
-              />
-              <path
-                d="M282 392 C287 375 281 361 268 366 C265 354 249 354 247 369 C234 365 227 377 238 389 C246 409 255 428 265 435 C271 438 278 438 286 434 C287 418 285 403 282 392 Z"
-                fill="#825539"
-              />
-              <path
-                d="M282 392 C287 375 281 361 268 366 C265 354 249 354 247 369 C234 365 227 377 238 389 C246 409 255 428 265 435 C274 440 285 436 320 415"
-                stroke="#0B0908"
-                strokeWidth="8.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                opacity="0.6"
               />
             </svg>
-          )}
+          </div>
         </div>
       );
     }
@@ -1543,8 +1121,8 @@
      */
     function MeadowRestingCapybara({ className = "w-48 h-32" }) {
       return (
-        <div className={`relative mx-auto select-none ${className}`}>
-          <svg viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        <div className={`relative mx-auto select-none ${className}`} aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
             {/* Soft Archival Sky & Cloud Silhouette (Inspired by Ref Image 2) */}
             <rect x="16" y="12" width="208" height="126" rx="16" fill="#E8E3D9" fillOpacity="0.55" />
             <path
@@ -1590,6 +1168,8 @@
     // ============================================================================
     function LibraryIndexCard({ item, index, total, onPronounce, onInspect, soundEnabled }) {
       const [flipped, setFlipped] = useState(false);
+      const pointerStartRef = useRef(null);
+      const suppressFlipRef = useRef(false);
       const posStyle = getPosStyle(item.partOfSpeech);
       const tier = getLexiconTier(item.word, item.partOfSpeech);
       const catalogNo = getCatalogCode(item.word);
@@ -1599,22 +1179,50 @@
         setFlipped((prev) => !prev);
       };
 
-      const handleKeyDown = (e) => {
-        if (e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          handleFlip();
+      /*
+       * The rail scrolls horizontally. Track pointer travel so a swipe never
+       * becomes the click that flips a card by accident.
+       */
+      const handlePointerDown = (event) => {
+        pointerStartRef.current = { x: event.clientX, y: event.clientY };
+        suppressFlipRef.current = false;
+      };
+
+      const handlePointerMove = (event) => {
+        if (!pointerStartRef.current) return;
+        const dx = event.clientX - pointerStartRef.current.x;
+        const dy = event.clientY - pointerStartRef.current.y;
+        if (Math.hypot(dx, dy) > 10) {
+          suppressFlipRef.current = true;
         }
       };
 
+      const handlePointerUp = () => {
+        pointerStartRef.current = null;
+      };
+
+      const handlePointerCancel = () => {
+        pointerStartRef.current = null;
+        suppressFlipRef.current = false;
+      };
+
+      const handleCardClick = () => {
+        if (suppressFlipRef.current) {
+          suppressFlipRef.current = false;
+          return;
+        }
+        handleFlip();
+      };
+
       return (
-        <div
-          role="button"
-          tabIndex={0}
-          aria-pressed={flipped}
-          aria-label={`Kartu katalog ${index + 1} dari ${total}: ${item.word} (${item.partOfSpeech}). Tekan Spasi atau Enter untuk membalik kartu.`}
-          onClick={handleFlip}
-          onKeyDown={handleKeyDown}
-          className="perspective-1000 w-72 sm:w-80 h-60 shrink-0 cursor-pointer select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-sage rounded-[14px]"
+        <article
+          aria-label={`Catalog card ${index + 1} of ${total}: ${item.word} (${item.partOfSpeech})`}
+          onClick={handleCardClick}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
+          className="perspective-1000 w-72 sm:w-80 h-[17rem] sm:h-64 shrink-0 cursor-pointer select-none group rounded-[14px] focus-within:ring-2 focus-within:ring-sage"
         >
           <div
             className={`flip-card-inner ${
@@ -1626,7 +1234,7 @@
               {/* Top Archival Ruled Line */}
               <div className="flex items-center justify-between gap-2 pb-2 border-b-2 border-terracotta/40 dark:border-terracotta/50">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] font-semibold text-umber dark:text-[#B8AFA6]">
+                  <span className="hidden sm:inline font-mono text-[11px] font-semibold text-umber dark:text-[#B8AFA6]">
                     {catalogNo}
                   </span>
                   <TierStampBadge tier={tier} />
@@ -1639,9 +1247,9 @@
                     onPronounce(item.word);
                   }}
                   onKeyDown={(e) => e.stopPropagation()}
-                  className="btn-tactile w-8 h-8 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
-                  title={`Dengarkan pelafalan "${item.word}"`}
-                  aria-label={`Dengarkan pelafalan ${item.word}`}
+                  className="btn-tactile w-11 h-11 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
+                  title={`Listen to the pronunciation of "${item.word}"`}
+                  aria-label={`Listen to the pronunciation of ${item.word}`}
                 >
                   <Icons.Speaker className="w-3.5 h-3.5" />
                 </button>
@@ -1650,9 +1258,9 @@
               {/* Center Headword */}
               <div className="my-auto py-1">
                 <div className="flex items-baseline gap-2.5 flex-wrap">
-                  <h4 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] tracking-tight">
+                  <h3 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] tracking-tight">
                     {item.word}
-                  </h4>
+                  </h3>
                   {item.phonetic && (
                     <span className="font-mono text-xs text-umber dark:text-[#B8AFA6]">
                       {item.phonetic}
@@ -1664,7 +1272,7 @@
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border ${posStyle.bg} ${posStyle.text} ${posStyle.border}`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} aria-hidden="true" />
                     <span className="capitalize">{item.partOfSpeech}</span>
                   </span>
                   {item.context && (
@@ -1676,13 +1284,22 @@
               </div>
 
               {/* Bottom Footer with Classic Catalog Punch Hole */}
-              <div className="pt-2 border-t border-stoneDesk dark:border-nightBorder flex items-center justify-between text-[11px] font-mono text-umber dark:text-[#A59C94]">
-                <span className="inline-flex items-center gap-1.5 text-espresso dark:text-[#D9C7B0] font-sans font-medium">
-                  <Icons.FlipCard className="w-3.5 h-3.5 text-brass" />
-                  <span>Balik Kartu (Spasi)</span>
-                </span>
+              <div className="pt-2 border-t border-stoneDesk dark:border-nightBorder flex items-center justify-between gap-2 text-[11px] font-mono text-umber dark:text-[#A59C94]">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFlip();
+                  }}
+                  aria-expanded={flipped}
+                  aria-label={`Flip card for ${item.word}`}
+                  className="inline-flex min-h-11 items-center gap-1.5 text-espresso dark:text-[#D9C7B0] font-sans font-medium hover:text-terracotta dark:hover:text-[#E2B7AB]"
+                >
+                  <Icons.FlipCard className="w-3.5 h-3.5 text-brass-ink" />
+                  <span>Flip Card</span>
+                </button>
                 {/* Brass Catalog Rod Hole */}
-                <span className="w-3 h-3 rounded-full bg-linen dark:bg-nightDesk border border-[#B5AC99] dark:border-zinc-700 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-linen dark:bg-nightDesk border border-[#B5AC99] dark:border-zinc-700 inline-block" aria-hidden="true" />
                 <span>
                   {String(index + 1).padStart(2, "0")}/{String(total).padStart(2, "0")}
                 </span>
@@ -1693,7 +1310,7 @@
             <div className="flip-card-back bg-[#F8F5EC] dark:bg-[#231F1B] border-2 border-brass/70 p-4 sm:p-5 flex flex-col justify-between gap-2">
               <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-stoneDesk dark:border-nightBorder shrink-0">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-sage dark:text-[#98B49E] font-semibold">
-                  CATATAN MAKNA // {item.partOfSpeech}
+                  MEANING NOTE // {item.partOfSpeech}
                 </span>
                 <button
                   type="button"
@@ -1702,20 +1319,26 @@
                     onInspect(item.word);
                   }}
                   onKeyDown={(e) => e.stopPropagation()}
-                  className="text-[11px] font-medium text-espresso dark:text-[#D9C7B0] underline hover:text-terracotta"
+                  className="inline-flex min-h-11 items-center text-[11px] font-medium text-espresso dark:text-[#D9C7B0] underline hover:text-terracotta"
                 >
-                  Buka Monograf →
+                  Open Monograph
+                  <span aria-hidden="true"> →</span>
+                  <span className="sr-only"> for {item.word}</span>
                 </button>
               </div>
 
-              {/* Scrollable full text area so long examples never get cut off */}
+              {/* Scrollable full text area so long examples never get cut off.
+                  It is focusable so keyboard users can reach and scroll it. */}
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="space-y-1.5 my-auto overflow-y-auto max-h-32 pr-1 cursor-auto"
+                role="group"
+                aria-label={`Meaning details and example for ${item.word}`}
+                tabIndex={0}
+                className="space-y-1.5 my-auto overflow-y-auto max-h-32 pr-1 cursor-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-sage rounded-sm"
               >
-                <h4 className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] leading-snug">
+                <h3 lang="id" className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] leading-snug">
                   {item.meaning}
-                </h4>
+                </h3>
                 {item.definition && (
                   <p className="text-[11px] text-umber dark:text-[#B8AFA6] leading-relaxed">
                     {item.definition}
@@ -1726,7 +1349,7 @@
                     <p className="text-xs font-medium text-espresso dark:text-[#EAE4DC] leading-relaxed">
                       "{item.example.en}"
                     </p>
-                    <p className="text-[11px] text-umber dark:text-[#A59C94] italic leading-relaxed">
+                    <p lang="id" className="text-[11px] text-umber dark:text-[#A59C94] italic leading-relaxed">
                       "{item.example.id}"
                     </p>
                   </div>
@@ -1734,14 +1357,23 @@
               </div>
 
               <div className="flex items-center justify-between text-[11px] font-mono text-umber dark:text-[#A59C94] shrink-0 pt-1 border-t border-stoneDesk dark:border-nightBorder">
-                <span>Arsip: {item.dateAdded}</span>
-                <span className="text-espresso dark:text-[#D9C7B0] font-sans font-medium underline">
-                  Sisi Depan ↺
-                </span>
+                <span>Archived: {item.dateAdded}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFlip();
+                  }}
+                  aria-expanded={flipped}
+                  aria-label={`Show the front side of the card for ${item.word}`}
+                  className="inline-flex min-h-11 items-center text-espresso dark:text-[#D9C7B0] font-sans font-medium underline hover:text-terracotta dark:hover:text-[#E2B7AB]"
+                >
+                  Front Side ↺
+                </button>
               </div>
             </div>
           </div>
-        </div>
+        </article>
       );
     }
 
@@ -1782,6 +1414,56 @@
         () => getSimilarWords(lastSearchedTerm),
         [lastSearchedTerm]
       );
+
+      // Mobile "Word of the Day": one single-word entry, chosen deterministically
+      // from the calendar date so it stays stable throughout the day.
+      const today = new Date();
+      const todayLabel = today
+        .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        .toUpperCase();
+      const dailyWordKeys = availableWords.filter((word) => !word.includes(" "));
+      const dailySeed = Number(
+        `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(
+          today.getDate()
+        ).padStart(2, "0")}`
+      );
+      const dailyWord =
+        MOCK_WORDS[dailyWordKeys[dailySeed % dailyWordKeys.length]] ||
+        MOCK_WORDS[availableWords[0]];
+      const dailyMeaning = dailyWord.meanings[0];
+
+      const handleDailyWord = () => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        onSearch(dailyWord.word);
+      };
+
+      const mascotCopy =
+        mascotState === "typing"
+          ? {
+              label: "OBSERVATION LENS ACTIVE",
+              message: "Kapi examines the entry you are typing through his magnifying lens."
+            }
+          : mascotState === "processing"
+          ? {
+              label: "EXAMINING THE INDEX...",
+              message: "Opening the monograph pages and phonetic transcription..."
+            }
+          : mascotState === "greeting"
+          ? {
+              label: "KAPI SAYS HELLO",
+              message:
+                "Kapi looks up from the ledger, adjusts his glasses, and wishes you a pleasant study session."
+            }
+          : mascotState === "celebrating"
+          ? {
+              label: "CARD ARCHIVED",
+              message: "The new entry has been stamped and filed in the catalog drawer."
+            }
+          : {
+              label: "A QUIET READING DESK",
+              message:
+                "Enjoying a warm cup of coffee while keeping you company during your vocabulary study."
+            };
 
       useEffect(() => {
         if (savedWords.length > 0 && activeCardIndex >= savedWords.length) {
@@ -1887,83 +1569,120 @@
       };
 
       return (
-        <div className="space-y-8 animate-fade-slide">
+        <div className="space-y-2 sm:space-y-7 animate-fade-slide">
           {/* =================================================================== */}
-          {/* ARCHIVAL STUDY HEADER WITH SCHOLARLY CAPYBARA                       */}
+          {/* STUDY HEADER — MOBILE FOLIO + WORD OF THE DAY; FULL DESK FROM SM   */}
           {/* =================================================================== */}
-          <section className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-2.5 max-w-xl text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-[11px] uppercase tracking-wider text-umber dark:text-[#B8AFA6]">
-                  <span>MONOGRAPH SERIES // EN–ID</span>
-                  <span>•</span>
-                  <span>STUDI KONTEKSTUAL</span>
+          <section
+            className="bg-parchment dark:bg-nightCard rounded-2xl p-2.5 sm:p-6 lg:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival"
+            aria-labelledby="lexicon-title"
+          >
+            <div className="flex items-center justify-between gap-2.5 sm:gap-5 md:gap-6">
+              <div className="min-w-0 text-left max-w-xl">
+                {/* Mobile folio strip replaces the fuller badge to keep one calm line. */}
+                <div className="sm:hidden flex items-center justify-between gap-2 border-b border-stoneDesk dark:border-nightBorder pb-1.5 font-mono text-[9px] leading-none uppercase text-umber dark:text-[#B8AFA6]">
+                  <span className="tracking-[0.08em]">Monograph Series</span>
+                  <span className="tracking-[0.12em] text-brass-ink dark:text-[#C8A97E]">{todayLabel}</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] leading-snug">
-                  Catatan Leksikon & Telaah Makna Kontekstual.
+
+                {/* Tablet and desktop keep the original full badge. */}
+                <div className="hidden sm:flex w-fit max-w-full flex-wrap items-center gap-x-1 sm:gap-x-2 px-1.5 sm:px-3 py-1 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-[9px] leading-tight tracking-normal sm:text-[11px] sm:leading-normal sm:tracking-wider uppercase text-umber dark:text-[#B8AFA6]">
+                  <span>MONOGRAPH SERIES // EN–ID</span>
+                  <span aria-hidden="true">•</span>
+                  <span>CONTEXTUAL STUDY</span>
+                </div>
+                <h1
+                  id="lexicon-title"
+                  className="mt-2 sm:mt-2.5 text-[17px] sm:text-2xl lg:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] leading-tight sm:leading-snug"
+                >
+                  Lexicon &amp; Contextual Meaning.
                 </h1>
-                <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6] leading-relaxed">
-                  Telusuri perubahan makna kata bahasa Inggris berdasarkan kelas kata, ragam situasi, serta idiom bersama{" "}
+                <p className="hidden sm:block mt-2.5 text-sm leading-relaxed text-umber dark:text-[#B8AFA6]">
+                  Trace how English words shift meaning across parts of speech, situations, and idioms with{" "}
                   <span className="font-semibold text-espresso dark:text-[#EAE4DC]">
-                    Kapi sang Pustakawan
+                    Kapi the Librarian
                   </span>
-                  —lalu arsipkan ke dalam laci kartu katalog pribadimu.
+                  —then file each sense in your personal catalog drawer.
                 </p>
               </div>
 
-              {/* Scholarly Capybara Desk Card (Fine-line ink & coffee/spectacles, NO orange) */}
-              <div className="flex items-center gap-3.5 bg-linen/90 dark:bg-nightDesk px-4 py-3 rounded-xl border border-stoneDesk dark:border-nightBorder shrink-0">
+              {/* Kapi stays present on phones; the desk note returns at desktop width. */}
+              <div className="flex items-center gap-2.5 sm:gap-3.5 bg-linen/90 dark:bg-nightDesk p-1 sm:p-3 rounded-xl border border-stoneDesk dark:border-nightBorder shrink-0">
                 <ArchivistCapybara
                   state={mascotState}
                   onClick={onGreetArchivist}
-                  className="w-24 h-24 shrink-0"
+                  className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 shrink-0"
                 />
-                <div className="space-y-1 max-w-[180px]">
+                <div
+                  className="sr-only lg:not-sr-only space-y-1 max-w-[180px]"
+                  aria-live="polite"
+                >
                   <div className="font-mono text-[10px] uppercase tracking-wider text-sage dark:text-[#98B49E] font-semibold">
-                    {mascotState === "typing"
-                      ? "LENSA PENGAMATAN AKTIF"
-                      : mascotState === "processing"
-                      ? "MENELAAH INDEKS..."
-                      : mascotState === "celebrating"
-                      ? "KARTU DIARSIPKAN"
-                      : "MEJA BACA TENANG"}
+                    {mascotCopy.label}
                   </div>
                   <p className="text-xs text-espresso dark:text-[#EAE4DC] leading-relaxed">
-                    {mascotState === "typing"
-                      ? "Kapi memeriksa entri yang sedang Anda ketik melalui lensa pembesar."
-                      : mascotState === "processing"
-                      ? "Membuka lembaran monograf dan transkripsi fonetik..."
-                      : mascotState === "celebrating"
-                      ? "Entri baru telah dicap dan disimpan ke dalam laci katalog."
-                      : "Menikmati secangkir kopi hangat sambil menemani telaah kosakata Anda."}
+                    {mascotCopy.message}
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Mobile Word of the Day: one compact daily specimen linking into the lexicon. */}
+            <button
+              type="button"
+              onClick={handleDailyWord}
+              className="sm:hidden mt-1.5 flex min-h-11 w-full items-center justify-between gap-2 rounded-r-lg border-l-2 border-brass/70 bg-linen/75 dark:bg-nightDesk/75 py-1 pl-2.5 pr-2 text-left btn-tactile"
+            >
+              <span className="min-w-0">
+                <span className="block font-mono text-[7.5px] uppercase leading-none tracking-[0.14em] text-brass-ink dark:text-[#C8A97E]">
+                  Word of the day
+                </span>
+                <span className="mt-0.5 flex min-w-0 items-baseline gap-1.5">
+                  <span className="truncate font-serif-editorial text-[16px] font-semibold leading-none text-espresso dark:text-[#F5F2EB]">
+                    {dailyWord.word}
+                  </span>
+                  <span className="shrink-0 font-mono text-[8.5px] leading-none text-umber dark:text-[#B8AFA6]">
+                    {dailyWord.phonetic}
+                  </span>
+                </span>
+              </span>
+              <span className="flex min-w-0 shrink-0 items-center gap-1.5">
+                <span className="max-w-[5.5rem] truncate font-sans text-[11px] font-medium leading-none text-sage dark:text-[#98B49E]">
+                  {dailyMeaning.translation}
+                </span>
+                <span aria-hidden="true" className="font-mono text-[11px] leading-none text-umber dark:text-[#B8AFA6]">
+                  →
+                </span>
+              </span>
+            </button>
           </section>
 
           {/* =================================================================== */}
           {/* TWO-COLUMN EDITORIAL DESK: SEARCH INQUIRY & MONOGRAPH BREAKDOWN     */}
           {/* =================================================================== */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          <section
+            className="desk-grid"
+            aria-label="Lexicon search and monograph workspace"
+          >
             {/* LEFT PANEL: SPECIMEN INQUIRY & CATALOG INDEX (5 Columns) */}
-            <div className="lg:col-span-5 bg-parchment dark:bg-nightCard rounded-2xl p-6 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between space-y-5">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded bg-slateLight dark:bg-[#232D34] text-espresso dark:text-[#D5E2EC] border border-[#C5D3DD] dark:border-[#364652] text-xs font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-riverSlate dark:bg-[#8CA7BA]" />
+            <div className="desk-grid__inquiry bg-parchment dark:bg-nightCard rounded-2xl p-2.5 sm:p-5 lg:p-6 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between space-y-5">
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="visually-hidden">Lexicon search and specimen index</h2>
+                <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+                  <span className="inline-flex min-w-0 items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 lg:px-3 py-1 rounded bg-slateLight dark:bg-[#232D34] text-espresso dark:text-[#D5E2EC] border border-[#C5D3DD] dark:border-[#364652] text-[11px] sm:text-xs font-medium">
+                    <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-riverSlate dark:bg-[#8CA7BA]" aria-hidden="true" />
                     <span>
                       {langDirection === "en-id"
-                        ? "Entri Bahasa Inggris → Indonesia"
-                        : "Kata Kunci Indonesia → Inggris"}
+                        ? "English → Indonesian"
+                        : "Indonesian → English"}
                     </span>
                   </span>
 
                   <button
                     type="button"
                     onClick={handleSwitchLanguages}
-                    className="btn-tactile px-2.5 py-1 rounded border border-stoneDesk dark:border-nightBorder bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] text-xs font-mono inline-flex items-center gap-1.5 hover:border-brass"
-                    title="Tukar arah pencarian bahasa"
+                    className="btn-tactile min-h-11 px-2.5 lg:px-3 py-1 rounded border border-stoneDesk dark:border-nightBorder bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] text-xs font-mono inline-flex items-center gap-1.5 hover:border-brass"
+                    title="Switch search direction"
                   >
                     <Icons.SwitchDir
                       className={`w-3.5 h-3.5 transition-transform duration-300 ${
@@ -1971,14 +1690,23 @@
                       }`}
                     />
                     <span>{langDirection === "en-id" ? "EN/ID" : "ID/EN"}</span>
+                    <span className="sr-only">
+                      — switch search direction. Current direction:{" "}
+                      {langDirection === "en-id" ? "English to Indonesian" : "Indonesian to English"}
+                    </span>
                   </button>
                 </div>
 
                 {/* Main Interactive Input (2px tactile border) */}
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3" role="search" aria-busy={isLoading}>
                   <div className="relative">
+                    <label htmlFor="lexicon-query" className="visually-hidden">
+                      Search the contextual lexicon
+                    </label>
                     <textarea
-                      rows="3"
+                      id="lexicon-query"
+                      rows="2"
+                      maxLength={120}
                       value={query}
                       onChange={handleInputChange}
                       onKeyDown={(e) => {
@@ -1989,33 +1717,43 @@
                       }}
                       placeholder={
                         langDirection === "en-id"
-                          ? "Ketik kata, phrasal verb, atau idiom... (mis. run, light, break the ice, resilient)"
-                          : "Ketik arti bahasa Indonesia untuk mencari padanan Inggrisnya... (mis. berlari, ringan, tangguh)"
+                          ? "Type a word, phrasal verb, or idiom... (e.g. run, light, break the ice, resilient)"
+                          : "Type an Indonesian meaning to find its English equivalent... (e.g. berlari, ringan, tangguh)"
                       }
-                      className="w-full p-4 rounded-xl bg-linen/70 dark:bg-nightDesk border-2 border-[#B5AC99] dark:border-[#4A423B] focus:border-espresso dark:focus:border-[#C8A97E] text-base font-medium text-espresso dark:text-[#F5F2EB] placeholder:text-umber/60 dark:placeholder:text-[#8C827A] focus:outline-none resize-none transition-colors"
-                      aria-label="Kotak pencarian leksikon kontekstual"
+                      className="w-full p-3.5 sm:p-4 rounded-xl bg-linen/70 dark:bg-nightDesk border-2 border-[#B5AC99] dark:border-[#4A423B] focus:border-espresso dark:focus:border-[#C8A97E] text-base font-medium text-espresso dark:text-[#F5F2EB] placeholder:text-umber/60 dark:placeholder:text-[#8C827A] focus:outline-none resize-none transition-colors"
+                      aria-describedby="lexicon-search-note lexicon-character-count"
+                      autoComplete="off"
                     />
                   </div>
 
-                  <p className="text-[11px] text-umber dark:text-[#A59C94] leading-relaxed">
-                    Catatan meja: Fokus pada pembedahan makna kosakata tunggal, phrasal verb, dan idiom beserta konteks penggunaannya.
+                  <p
+                    id="lexicon-search-note"
+                    className="sr-only sm:not-sr-only sm:text-[11px] text-umber dark:text-[#A59C94] leading-relaxed"
+                  >
+                    Desk note: focused on unpacking the meaning of single words, phrasal verbs, and idioms within their contexts.
                   </p>
 
                   {/* Action Toolbar */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 sm:pt-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={handleVoiceMic}
-                        className={`btn-tactile px-3 py-2 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 ${
+                        className={`btn-tactile min-h-11 px-2.5 sm:px-3 py-2 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 ${
                           isListeningMic
                             ? "bg-sage text-white border-sage"
                             : "bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border-stoneDesk dark:border-nightBorder hover:border-brass"
                         }`}
-                        title="Gunakan pendiktean suara"
+                        title="Use voice dictation"
+                        aria-pressed={isListeningMic}
                       >
                         <Icons.Mic className="w-3.5 h-3.5" />
-                        <span>{isListeningMic ? "Menyimak..." : "Dikte"}</span>
+                        <span>{isListeningMic ? "Listening..." : "Dictate"}</span>
+                        <span className="sr-only">
+                          {isListeningMic
+                            ? " — listening for voice input"
+                            : " — start voice dictation"}
+                        </span>
                       </button>
 
                       {query && (
@@ -2025,13 +1763,14 @@
                             ArchivalAudio.playKeyClick(soundEnabled);
                             setQuery("");
                           }}
-                          className="btn-tactile px-2.5 py-2 rounded-lg bg-linen dark:bg-nightDesk text-umber dark:text-[#B8AFA6] hover:text-espresso border border-stoneDesk dark:border-nightBorder text-xs font-mono"
+                          className="btn-tactile min-h-11 px-3 py-2 rounded-lg bg-linen dark:bg-nightDesk text-umber dark:text-[#B8AFA6] hover:text-espresso border border-stoneDesk dark:border-nightBorder text-xs font-mono"
+                          aria-label="Clear the search query"
                         >
-                          ✕ Bersihkan
+                          ✕ Clear
                         </button>
                       )}
 
-                      <span className="font-mono text-[11px] text-umber/70 dark:text-[#8C827A]">
+                      <span id="lexicon-character-count" className="font-mono text-[11px] text-umber dark:text-[#8C827A]">
                         {query.length}/120
                       </span>
                     </div>
@@ -2039,10 +1778,10 @@
                     <button
                       type="submit"
                       disabled={isLoading || !query.trim()}
-                      className="btn-tactile px-5 py-2.5 rounded-lg bg-espresso hover:bg-[#36302D] dark:bg-[#EAE4DC] dark:hover:bg-white text-parchment dark:text-espresso disabled:opacity-40 font-medium text-xs inline-flex items-center gap-2"
+                      className="btn-tactile flex-1 sm:flex-none sm:w-full xl:w-auto min-h-11 px-2.5 sm:px-5 py-2.5 rounded-lg bg-espresso hover:bg-[#36302D] dark:bg-[#EAE4DC] dark:hover:bg-white text-parchment dark:text-espresso disabled:opacity-40 font-medium text-xs whitespace-nowrap inline-flex items-center justify-center gap-2"
                     >
                       <Icons.Search className="w-3.5 h-3.5" />
-                      <span>{isLoading ? "Menelaah..." : "Telaah Entri"}</span>
+                      <span>{isLoading ? "Examining..." : "Examine Entry"}</span>
                     </button>
                   </div>
                 </form>
@@ -2051,10 +1790,17 @@
               {/* Curated Specimen Index & Recent Inquiries (1px subtle divider) */}
               <div className="space-y-3 pt-4 border-t border-stoneDesk dark:border-nightBorder">
                 <div className="space-y-1.5">
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-umber dark:text-[#A59C94]">
-                    INDEKS SPESIMEN TERSEDIA ({availableWords.length} ENTRI)
+                  <div
+                    id="available-specimens-label"
+                    className="font-mono text-[10px] uppercase tracking-wider text-umber dark:text-[#A59C94]"
+                  >
+                    AVAILABLE SPECIMEN INDEX ({availableWords.length} ENTRIES)
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div
+                    className="flex flex-wrap gap-1.5"
+                    role="group"
+                    aria-labelledby="available-specimens-label"
+                  >
                     {availableWords.map((word) => {
                       const isCurrent = lastSearchedTerm.toLowerCase() === word.toLowerCase();
                       return (
@@ -2065,6 +1811,7 @@
                             ArchivalAudio.playKeyClick(soundEnabled);
                             onSearch(word);
                           }}
+                          aria-pressed={isCurrent}
                           className={`btn-tactile px-2.5 py-1 rounded text-xs font-mono border transition-colors ${
                             isCurrent
                               ? "bg-espresso text-parchment border-espresso dark:bg-[#EAE4DC] dark:text-espresso"
@@ -2081,26 +1828,33 @@
                 {searchHistory.length > 0 && (
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stoneDesk/60 dark:border-nightBorder/60">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-mono text-[10px] uppercase text-umber dark:text-[#A59C94]">
-                        Riwayat:
+                      <span
+                        id="search-history-label"
+                        className="font-mono text-[10px] uppercase text-umber dark:text-[#A59C94]"
+                      >
+                        History:
                       </span>
-                      {searchHistory.map((item) => (
-                        <button
-                          key={item}
-                          type="button"
-                          onClick={() => onSearch(item)}
-                          className="px-2 py-0.5 rounded text-[11px] font-mono bg-linen/80 dark:bg-nightDesk text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white border border-stoneDesk dark:border-nightBorder"
-                        >
-                          {item}
-                        </button>
-                      ))}
+                      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="search-history-label">
+                        {searchHistory.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => onSearch(item)}
+                            className="px-2 py-0.5 rounded text-[11px] font-mono bg-linen/80 dark:bg-nightDesk text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white border border-stoneDesk dark:border-nightBorder"
+                            aria-label={`Search again for ${item}`}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={onClearHistory}
                       className="font-mono text-[11px] text-umber hover:text-terracotta dark:text-[#A59C94] underline"
+                      aria-label="Clear search history"
                     >
-                      Hapus
+                      Clear
                     </button>
                   </div>
                 )}
@@ -2108,44 +1862,48 @@
             </div>
 
             {/* RIGHT PANEL: MONOGRAPH BREAKDOWN SHEET (7 Columns) */}
-            <div className="lg:col-span-7 bg-parchment dark:bg-nightCard rounded-2xl p-6 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between">
+            <div
+              className="desk-grid__monograph bg-parchment dark:bg-nightCard rounded-2xl p-4 sm:p-5 lg:p-6 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between"
+              aria-labelledby="monograph-sheet-label"
+              aria-busy={isLoading}
+            >
               <div className="flex items-center justify-between gap-2 pb-4 border-b border-stoneDesk dark:border-nightBorder">
-                <div className="flex items-center gap-2">
+                <h2 id="monograph-sheet-label" className="flex items-center gap-2">
                   <span className="font-mono text-xs font-semibold text-sage dark:text-[#98B49E]">
-                    LEMBAR MONOGRAF //
+                    MONOGRAPH SHEET //
                   </span>
-                  <span className="font-mono text-xs text-umber dark:text-[#B8AFA6]">
-                    {result && !isLoading ? result.catalogNo || "WL-ARC" : "SIAP"}
+                  <span className="font-mono text-xs font-normal text-umber dark:text-[#B8AFA6]">
+                    {result && !isLoading ? result.catalogNo || "WL-ARC" : "READY"}
                   </span>
-                </div>
+                </h2>
 
                 {result && !isLoading && (
                   <TierStampBadge tier={result.tier || 1} />
                 )}
               </div>
 
-              <div className="my-auto py-4">
+              <div className="my-auto py-4" aria-live="polite">
                 {isLoading ? (
-                  <div className="py-12 text-center space-y-3 animate-pulse">
-                    <div className="w-14 h-14 mx-auto rounded-full bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-brass">
+                  <div className="py-12 text-center space-y-3 animate-pulse" role="status">
+                    <div className="w-14 h-14 mx-auto rounded-full bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-brass-ink">
                       <Icons.Search className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
                       <h3 className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                        Menelusuri arsip leksikon dan contoh konteks...
+                        Searching the lexicon archive and contextual examples...
                       </h3>
                       <p className="text-xs font-mono text-umber dark:text-[#A59C94]">
-                        MEMUAT FONETIK & VARIASI KELAS KATA
+                        LOADING PHONETICS & PART-OF-SPEECH VARIANTS
                       </p>
                     </div>
                   </div>
                 ) : !hasSearched ? (
                   <div className="py-12 text-center space-y-2">
                     <p className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                      Pilih atau ketik sebuah entri di panel kiri untuk ditelaah.
+                      Select or type an entry in the left panel to examine it.
                     </p>
                     <p className="text-xs text-umber dark:text-[#A59C94]">
-                      Tersedia entri polimisemi seperti "run", "light", "break", maupun idiom "break the ice".
+                      Polysemous entries such as "run", "light", and "break" are available, along with the idiom "break the ice".
                     </p>
                   </div>
                 ) : !result ? (
@@ -2154,20 +1912,20 @@
                     <MeadowRestingCapybara className="w-48 h-28" />
                     <div className="space-y-1 max-w-md mx-auto">
                       <span className="font-mono text-[10px] uppercase tracking-wider text-terracotta dark:text-[#D99B8C] font-semibold">
-                        ENTRI BELUM TERCATAT DI ARSIP LOKAL
+                        ENTRY NOT RECORDED IN THE LOCAL ARCHIVE
                       </span>
                       <h3 className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                        Tidak ditemukan monograf untuk "{lastSearchedTerm}"
+                        No monograph found for "{lastSearchedTerm}"
                       </h3>
                       <p className="text-xs text-umber dark:text-[#B8AFA6] leading-relaxed">
-                        Katalog luring ini memuat 10 entri kurasi mendalam. Apakah Anda bermaksud menelaah salah satu entri yang berdekatan di bawah ini?
+                        This offline catalog contains 10 deeply curated entries. Did you mean to examine one of the nearby entries below?
                       </p>
                     </div>
 
                     {similarSuggestions.length > 0 && (
                       <div className="p-3.5 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder space-y-2 max-w-md mx-auto">
                         <div className="font-mono text-[10px] uppercase text-umber dark:text-[#A59C94]">
-                          Rekomendasi Entri Terdekat:
+                          Nearby Entry Recommendations:
                         </div>
                         <div className="flex flex-wrap justify-center gap-2">
                           {similarSuggestions.map((sug) => (
@@ -2175,10 +1933,11 @@
                               key={sug.key}
                               type="button"
                               onClick={() => onSearch(sug.key)}
+                              aria-label={`Search for ${sug.key}, meaning ${sug.mainTranslation}`}
                               className="btn-tactile px-3 py-1.5 rounded-lg text-xs font-mono bg-parchment dark:bg-nightCard text-espresso dark:text-[#F5F2EB] border border-brass/60 inline-flex items-center gap-1.5"
                             >
                               <span className="font-semibold">{sug.key}</span>
-                              <span className="text-[11px] font-sans text-umber dark:text-[#B8AFA6]">
+                              <span lang="id" className="text-[11px] font-sans text-umber dark:text-[#B8AFA6]">
                                 ({sug.mainTranslation})
                               </span>
                             </button>
@@ -2203,6 +1962,7 @@
                       <button
                         type="button"
                         onClick={() => onPronounce(result.word)}
+                        aria-pressed={isSpeaking}
                         className={`btn-tactile px-3.5 py-2 rounded-lg border text-xs font-medium inline-flex items-center gap-2 ${
                           isSpeaking
                             ? "bg-sage text-white border-sage"
@@ -2210,11 +1970,12 @@
                         }`}
                       >
                         <Icons.Speaker className="w-4 h-4" />
-                        <span>Lafalkan (en-US)</span>
+                        <span>Pronounce (en-US)</span>
+                        <span className="sr-only"> for {result.word}</span>
                       </button>
                     </div>
 
-                    <div className="space-y-3 max-h-[390px] overflow-y-auto pr-1">
+                    <div className="space-y-3">
                       {result.meanings.map((meaningObj, idx) => {
                         const posStyle = getPosStyle(meaningObj.partOfSpeech);
                         const saved = isMeaningSaved(
@@ -2224,19 +1985,20 @@
                         );
 
                         return (
-                          <div
+                          <article
                             key={`${result.word}-${idx}`}
+                            aria-label={`Meaning ${idx + 1}: ${meaningObj.translation}`}
                             className="p-4 rounded-xl bg-linen/45 dark:bg-nightDesk/70 border border-stoneDesk dark:border-nightBorder space-y-3 hover:border-brass/70 transition-colors"
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-mono text-xs text-brass dark:text-[#C8A97E] font-semibold">
+                                <span className="font-mono text-xs text-brass-ink dark:text-[#C8A97E] font-semibold">
                                   {String(idx + 1).padStart(2, "0")}.
                                 </span>
                                 <span
                                   className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium border ${posStyle.bg} ${posStyle.text} ${posStyle.border}`}
                                 >
-                                  <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} />
+                                  <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} aria-hidden="true" />
                                   <span className="capitalize">{meaningObj.partOfSpeech}</span>
                                 </span>
                                 {meaningObj.context && (
@@ -2253,7 +2015,7 @@
                                 onClick={() =>
                                   onSaveMeaning(result.word, result.phonetic, meaningObj)
                                 }
-                                className={`btn-tactile px-3.5 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 border-2 self-start sm:self-auto ${
+                                className={`btn-tactile min-h-11 w-full sm:w-auto px-4 py-2.5 rounded-lg text-xs font-medium inline-flex items-center justify-center gap-1.5 border-2 ${
                                   saved
                                     ? "bg-sageLight/70 dark:bg-[#222D24] text-espresso dark:text-[#BBD0BF] border-sage/40 cursor-default"
                                     : "bg-parchment hover:bg-stoneDesk/60 dark:bg-nightCard text-espresso dark:text-[#F5F2EB] border-espresso dark:border-[#C8A97E]"
@@ -2262,19 +2024,19 @@
                                 {saved ? (
                                   <>
                                     <Icons.Check className="w-3.5 h-3.5 text-sage" />
-                                    <span>Terarsip di Katalog</span>
+                                    <span>Archived in Catalog</span>
                                   </>
                                 ) : (
                                   <>
-                                    <Icons.Bookmark className="w-3.5 h-3.5 text-brass" />
-                                    <span>+ Arsipkan Kartu</span>
+                                    <Icons.Bookmark className="w-3.5 h-3.5 text-brass-ink" />
+                                    <span>+ Archive Card</span>
                                   </>
                                 )}
                               </button>
                             </div>
 
                             <div>
-                              <h3 className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                              <h3 lang="id" className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
                                 {meaningObj.translation}
                               </h3>
                               <p className="text-xs text-umber dark:text-[#B8AFA6] mt-0.5 leading-relaxed">
@@ -2292,14 +2054,14 @@
                                     <p className="text-xs font-medium text-espresso dark:text-[#EAE4DC] leading-relaxed">
                                       "{ex.en}"
                                     </p>
-                                    <p className="text-xs text-umber dark:text-[#A59C94] italic leading-relaxed">
+                                    <p lang="id" className="text-xs text-umber dark:text-[#A59C94] italic leading-relaxed">
                                       "{ex.id}"
                                     </p>
                                   </div>
                                 ))}
                               </div>
                             )}
-                          </div>
+                          </article>
                         );
                       })}
                     </div>
@@ -2312,14 +2074,20 @@
           {/* =================================================================== */}
           {/* BOTTOM DRAWER: LACI KARTU INDEKS AKTIF (3D FLIP CATALOG CARDS)      */}
           {/* =================================================================== */}
-          <section className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-5">
+          <section
+            className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-5"
+            aria-labelledby="catalog-cards-title"
+          >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <div className="font-mono text-[11px] uppercase tracking-wider text-brass dark:text-[#C8A97E] font-semibold">
-                  LACI KARTU INDEKS // {savedWords.length} ARSIP TERSIMPAN
+                <div className="font-mono text-[11px] uppercase tracking-wider text-brass-ink dark:text-[#C8A97E] font-semibold">
+                  INDEX CARD DRAWER // {savedWords.length} ARCHIVED CARDS
                 </div>
-                <h2 className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                  Kartu Katalog Pustaka (Klik atau Tekan Spasi untuk Membalik)
+                <h2
+                  id="catalog-cards-title"
+                  className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]"
+                >
+                  Library Catalog Cards (Click a Card to Flip)
                 </h2>
               </div>
 
@@ -2330,7 +2098,7 @@
                     onClick={onLoadStarterWords}
                     className="btn-tactile px-3.5 py-2 rounded-lg bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border border-stoneDesk dark:border-nightBorder text-xs font-medium hover:border-brass"
                   >
-                    + Muat 5 Kartu Spesimen
+                    + Load 5 Specimen Cards
                   </button>
                 )}
 
@@ -2341,13 +2109,16 @@
                       onClick={() => scrollCarousel("left")}
                       disabled={activeCardIndex <= 0}
                       className="btn-tactile w-7 h-7 rounded bg-parchment dark:bg-nightCard disabled:opacity-35 border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-espresso dark:text-[#EAE4DC]"
-                      aria-label="Kartu sebelumnya"
+                      aria-label="Previous card"
                     >
                       <Icons.ChevronLeft className="w-4 h-4" />
                     </button>
 
-                    <span className="font-mono text-xs text-espresso dark:text-[#D9C7B0] px-1">
-                      Kartu {Math.min(activeCardIndex + 1, savedWords.length)} dari {savedWords.length}
+                    <span
+                      className="font-mono text-xs text-espresso dark:text-[#D9C7B0] px-1"
+                      aria-live="polite"
+                    >
+                      Card {Math.min(activeCardIndex + 1, savedWords.length)} of {savedWords.length}
                     </span>
 
                     <button
@@ -2355,7 +2126,7 @@
                       onClick={() => scrollCarousel("right")}
                       disabled={activeCardIndex >= savedWords.length - 1}
                       className="btn-tactile w-7 h-7 rounded bg-parchment dark:bg-nightCard disabled:opacity-35 border border-stoneDesk dark:border-nightBorder flex items-center justify-center text-espresso dark:text-[#EAE4DC]"
-                      aria-label="Kartu berikutnya"
+                      aria-label="Next card"
                     >
                       <Icons.ChevronRight className="w-4 h-4" />
                     </button>
@@ -2367,7 +2138,7 @@
                   onClick={() => onNavigate("dictionary")}
                   className="btn-tactile px-4 py-2 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs"
                 >
-                  Buka Laci Katalog Lengkap ({savedWords.length}) →
+                  Open Full Catalog Drawer ({savedWords.length}) →
                 </button>
               </div>
             </div>
@@ -2375,17 +2146,17 @@
             {savedWords.length === 0 ? (
               <div className="p-8 rounded-xl bg-linen/70 dark:bg-nightDesk border border-dashed border-stoneDesk dark:border-nightBorder text-center space-y-3">
                 <p className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                  Laci kartu indeks masih kosong.
+                  The index card drawer is still empty.
                 </p>
                 <p className="text-xs text-umber dark:text-[#A59C94] max-w-md mx-auto">
-                  Klik tombol <span className="font-semibold">[ + Arsipkan Kartu ]</span> pada lembar monograf di atas, atau muat 5 kartu spesimen awal untuk mencoba katalog interaktif.
+                  Click <span className="font-semibold">[ + Archive Card ]</span> on the monograph sheet above, or load the 5 specimen cards to try the interactive catalog.
                 </p>
                 <button
                   type="button"
                   onClick={onLoadStarterWords}
                   className="btn-tactile px-4 py-2 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
                 >
-                  + Muat 5 Kartu Spesimen
+                  + Load 5 Specimen Cards
                 </button>
               </div>
             ) : (
@@ -2393,10 +2164,23 @@
                 <div
                   ref={carouselRef}
                   onScroll={handleCarouselScroll}
-                  className="flex items-center gap-4 overflow-x-auto pb-3 pt-1 px-1 snap-x snap-mandatory scroll-smooth"
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      scrollCarousel("left");
+                    } else if (e.key === "ArrowRight") {
+                      e.preventDefault();
+                      scrollCarousel("right");
+                    }
+                  }}
+                  className="card-rail"
+                  role="region"
+                  aria-roledescription="carousel"
+                  aria-label="Archived index cards. Use the left and right arrow keys to browse."
+                  tabIndex={0}
                 >
                   {savedWords.map((item, idx) => (
-                    <div key={item.id} className="snap-start">
+                    <div key={item.id} className="snap-start shrink-0">
                       <LibraryIndexCard
                         item={item}
                         index={idx}
@@ -2407,27 +2191,6 @@
                       />
                     </div>
                   ))}
-                </div>
-
-                {/* Pagination Dots */}
-                <div className="flex items-center justify-center gap-1.5 pt-1" role="tablist" aria-label="Posisi kartu indeks">
-                  {savedWords.map((item, idx) => {
-                    const isCurrent = idx === activeCardIndex;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => scrollToCardIndex(idx)}
-                        aria-label={`Lompat ke kartu ${idx + 1}: ${item.word}`}
-                        aria-current={isCurrent ? "true" : "false"}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          isCurrent
-                            ? "w-6 bg-espresso dark:bg-[#C8A97E]"
-                            : "w-2 bg-stoneDesk dark:bg-nightBorder hover:bg-brass"
-                        }`}
-                      />
-                    );
-                  })}
                 </div>
               </div>
             )}
@@ -2482,17 +2245,23 @@
 
       return (
         <div className="space-y-6 animate-fade-slide">
-          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-5">
+          <section
+            className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-7 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-5"
+            aria-labelledby="catalog-title"
+          >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <div className="font-mono text-[11px] uppercase tracking-wider text-brass dark:text-[#C8A97E] font-semibold">
-                  ARSIP INDEKS PRIBADI // {savedWords.length} KARTU
+                <div className="font-mono text-[11px] uppercase tracking-wider text-brass-ink dark:text-[#C8A97E] font-semibold">
+                  PERSONAL INDEX ARCHIVE // {savedWords.length} CARDS
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                  Laci Katalog Kosakata
+                <h1
+                  id="catalog-title"
+                  className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]"
+                >
+                  Vocabulary Catalog Drawer
                 </h1>
                 <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6]">
-                  Seluruh kartu kosakata kontekstual yang telah dicap dan disimpan bersama Kapi.
+                  Every contextual vocabulary card stamped and filed with Kapi.
                 </p>
               </div>
 
@@ -2503,7 +2272,7 @@
                     onClick={onLoadStarterWords}
                     className="btn-tactile px-3.5 py-2 rounded-lg bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border border-stoneDesk dark:border-nightBorder text-xs font-medium"
                   >
-                    + Muat 5 Spesimen
+                    + Load 5 Specimens
                   </button>
                 )}
                 <button
@@ -2511,7 +2280,7 @@
                   onClick={() => onNavigate("quiz")}
                   className="btn-tactile px-4 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs"
                 >
-                  Buka Ruang Uji Ingatan (Kuis) →
+                  Open Recall Quiz Room →
                 </button>
               </div>
             </div>
@@ -2519,14 +2288,18 @@
             {savedWords.length > 0 && (
               <div className="space-y-3 pt-4 border-t border-stoneDesk dark:border-nightBorder">
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-umber">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-umber" aria-hidden="true">
                     <Icons.Search className="w-4 h-4" />
                   </span>
+                  <label htmlFor="archive-filter" className="visually-hidden">
+                    Filter the vocabulary archive
+                  </label>
                   <input
-                    type="text"
+                    id="archive-filter"
+                    type="search"
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
-                    placeholder="Saring arsip berdasarkan kata, terjemahan, atau kalimat contoh..."
+                    placeholder="Filter the archive by word, translation, or example sentence..."
                     className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder focus:border-brass text-sm text-espresso dark:text-[#F5F2EB] focus:outline-none"
                   />
                   {searchFilter && (
@@ -2534,13 +2307,18 @@
                       type="button"
                       onClick={() => setSearchFilter("")}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-umber"
+                      aria-label="Clear the archive filter"
                     >
                       ✕
                     </button>
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  role="group"
+                  aria-label="Filter by part of speech"
+                >
                   {posCategories.map((cat) => {
                     const active = posFilter === cat;
                     const count = posCounts[cat] || 0;
@@ -2552,14 +2330,15 @@
                           ArchivalAudio.playKeyClick(soundEnabled);
                           setPosFilter(cat);
                         }}
+                        aria-pressed={active}
                         className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-medium capitalize border transition-colors flex items-center gap-1.5 ${
                           active
                             ? "bg-espresso text-parchment border-espresso dark:bg-[#EAE4DC] dark:text-espresso"
                             : "bg-linen dark:bg-nightDesk text-umber dark:text-[#B8AFA6] border-stoneDesk dark:border-nightBorder"
                         }`}
                       >
-                        <span>{cat === "all" ? "Semua Kelas" : cat}</span>
-                        <span className="font-mono text-[10px] opacity-75">
+                        <span>{cat === "all" ? "All Parts of Speech" : cat}</span>
+                        <span className="font-mono text-[10px]">
                           ({count})
                         </span>
                       </button>
@@ -2568,17 +2347,20 @@
                 </div>
               </div>
             )}
-          </div>
+          </section>
 
           {savedWords.length === 0 ? (
-            <div className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder shadow-archival space-y-4">
+            <section
+              className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder shadow-archival space-y-4"
+              aria-labelledby="empty-catalog-title"
+            >
               <MeadowRestingCapybara className="w-52 h-32" />
               <div className="space-y-1 max-w-md mx-auto">
-                <h2 className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                  Belum Ada Kartu di Laci Katalog
+                <h2 id="empty-catalog-title" className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  No Cards in the Catalog Drawer Yet
                 </h2>
                 <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6]">
-                  Telaah kosakata di Meja Leksikon atau muat 5 kartu spesimen contoh untuk mulai membangun koleksi Anda.
+                  Study vocabulary at the Lexicon Desk to start building your collection.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-3 pt-1">
@@ -2587,21 +2369,24 @@
                   onClick={() => onNavigate("translator")}
                   className="btn-tactile px-4 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
                 >
-                  Ke Meja Leksikon
+                  Go to Lexicon Desk
                 </button>
                 <button
                   type="button"
                   onClick={onLoadStarterWords}
                   className="btn-tactile px-4 py-2.5 rounded-lg bg-sage text-white text-xs font-medium"
                 >
-                  + Muat 5 Kartu Spesimen
+                  + Load 5 Specimen Cards
                 </button>
               </div>
-            </div>
+            </section>
           ) : filteredWords.length === 0 ? (
-            <div className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder space-y-3">
+            <div
+              className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder space-y-3"
+              role="status"
+            >
               <h3 className="text-base font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                Tidak ditemukan kartu yang cocok dengan penyaringan "{searchFilter}"
+                No cards match the filter "{searchFilter}"
               </h3>
               <button
                 type="button"
@@ -2611,32 +2396,34 @@
                 }}
                 className="btn-tactile px-4 py-2 rounded-lg bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder text-xs font-medium"
               >
-                Atur Ulang Penyaring
+                Reset Filters
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ul className="catalog-grid" aria-label="Archived vocabulary cards">
               {filteredWords.map((item) => {
                 const posStyle = getPosStyle(item.partOfSpeech);
                 const tier = getLexiconTier(item.word, item.partOfSpeech);
                 const catalogNo = getCatalogCode(item.word);
 
                 return (
-                  <div
-                    key={item.id}
-                    className="bg-parchment dark:bg-nightCard rounded-xl p-5 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between gap-4 hover:border-brass/70 transition-colors"
-                  >
+                  <li key={item.id}>
+                    <article
+                      aria-label={`${item.word}, ${item.partOfSpeech}: ${item.meaning}`}
+                      className="h-full bg-parchment dark:bg-nightCard rounded-xl p-5 border border-stoneDesk dark:border-nightBorder shadow-archival flex flex-col justify-between gap-4 hover:border-brass/70 transition-colors"
+                    >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2 pb-2 border-b border-stoneDesk/70 dark:border-nightBorder">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono text-[11px] text-brass dark:text-[#C8A97E]">
+                            <span className="font-mono text-[11px] text-brass-ink dark:text-[#C8A97E]">
                               {catalogNo}
                             </span>
                             <button
                               type="button"
                               onClick={() => onQuickSearch(item.word)}
                               className="text-xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB] hover:underline"
+                              aria-label={`Examine the monograph for ${item.word}`}
                             >
                               {item.word}
                             </button>
@@ -2649,7 +2436,8 @@
                               type="button"
                               onClick={() => onPronounce(item.word)}
                               className="btn-tactile w-7 h-7 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
-                              title={`Lafalkan ${item.word}`}
+                              title={`Pronounce ${item.word}`}
+                              aria-label={`Pronounce ${item.word} in US English`}
                             >
                               <Icons.Speaker className="w-3.5 h-3.5" />
                             </button>
@@ -2659,7 +2447,7 @@
                             <span
                               className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border ${posStyle.bg} ${posStyle.text} ${posStyle.border}`}
                             >
-                              <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} />
+                              <span className={`w-1.5 h-1.5 rounded-full ${posStyle.dot}`} aria-hidden="true" />
                               <span className="capitalize">{item.partOfSpeech}</span>
                             </span>
                             <TierStampBadge tier={tier} />
@@ -2670,16 +2458,17 @@
                           type="button"
                           onClick={() => onDeleteWord(item.id, item.word)}
                           className="btn-tactile p-2 rounded-lg text-umber hover:text-terracotta hover:bg-linen dark:hover:bg-nightDesk transition-colors"
-                          title="Keluarkan dari Laci Katalog"
+                          title="Remove from Catalog Drawer"
+                          aria-label={`Remove the card for ${item.word} from the Catalog Drawer`}
                         >
                           <Icons.Trash className="w-4 h-4" />
                         </button>
                       </div>
 
                       <div>
-                        <div className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                        <p lang="id" className="text-lg font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
                           {item.meaning}
-                        </div>
+                        </p>
                         {item.definition && (
                           <p className="text-xs text-umber dark:text-[#B8AFA6] mt-0.5 leading-relaxed">
                             {item.definition}
@@ -2692,7 +2481,7 @@
                           <p className="text-xs font-medium text-espresso dark:text-[#EAE4DC] leading-relaxed">
                             "{item.example.en}"
                           </p>
-                          <p className="text-[11px] text-umber dark:text-[#A59C94] italic leading-relaxed">
+                          <p lang="id" className="text-[11px] text-umber dark:text-[#A59C94] italic leading-relaxed">
                             "{item.example.id}"
                           </p>
                         </div>
@@ -2700,19 +2489,20 @@
                     </div>
 
                     <div className="pt-2.5 border-t border-stoneDesk/60 dark:border-nightBorder flex items-center justify-between text-[11px] font-mono text-umber dark:text-[#A59C94]">
-                      <span>Diarsipkan {item.dateAdded}</span>
+                      <span>Archived {item.dateAdded}</span>
                       <button
                         type="button"
                         onClick={() => onQuickSearch(item.word)}
                         className="text-espresso dark:text-[#D9C7B0] font-sans font-medium hover:underline"
                       >
-                        Telaah Monograf →
+                        Examine Monograph →
                       </button>
                     </div>
-                  </div>
+                    </article>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
         </div>
       );
@@ -2864,17 +2654,24 @@
 
       if (savedWords.length === 0) {
         return (
-          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder shadow-archival space-y-4 animate-fade-slide">
+          <section
+            className="bg-parchment dark:bg-nightCard rounded-2xl p-10 text-center border border-stoneDesk dark:border-nightBorder shadow-archival space-y-4 animate-fade-slide"
+            aria-labelledby="quiz-empty-title"
+          >
+            <h1 className="visually-hidden">Recall Quiz</h1>
             <SleepingBookCapybara className="w-36 h-32 mx-auto" />
             <div className="space-y-1 max-w-md mx-auto">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-brass dark:text-[#C8A97E]">
-                RUANG UJI INGATAN // PERSIAPAN
+              <span className="font-mono text-[10px] uppercase tracking-wider text-brass-ink dark:text-[#C8A97E]">
+                RECALL ROOM // PREPARATION
               </span>
-              <h2 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                Laci Katalog Belum Memiliki Kartu
+              <h2
+                id="quiz-empty-title"
+                className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]"
+              >
+                The Catalog Drawer Has No Cards Yet
               </h2>
               <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6]">
-                Uji ingatan menarik sejumlah kartu acak dari Laci Katalog Anda. Muat 5 kartu spesimen contoh di bawah ini untuk langsung memulai.
+                The recall test draws a set of random cards from your Catalog Drawer. Load 5 specimen cards below to begin right away.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3 pt-1">
@@ -2883,37 +2680,43 @@
                 onClick={onLoadStarterWords}
                 className="btn-tactile px-4 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
               >
-                + Muat 5 Kartu Spesimen
+                + Load 5 Specimen Cards
               </button>
               <button
                 type="button"
                 onClick={() => onNavigate("translator")}
                 className="btn-tactile px-4 py-2.5 rounded-lg bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder text-xs font-medium"
               >
-                Ke Meja Leksikon
+                Go to Lexicon Desk
               </button>
             </div>
-          </div>
+          </section>
         );
       }
 
       if (quizState === "setup") {
         return (
-          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide">
+          <section
+            className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide"
+            aria-labelledby="quiz-setup-title"
+          >
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-5 border-b border-stoneDesk dark:border-nightBorder">
               <div className="space-y-2 text-center md:text-left">
-                <div className="font-mono text-[11px] uppercase tracking-wider text-brass dark:text-[#C8A97E] font-semibold">
-                  EVALUASI LEKSIKON ACAK // SELECT THE CORRECT ANSWER
+                <div className="font-mono text-[11px] uppercase tracking-wider text-brass-ink dark:text-[#C8A97E] font-semibold">
+                  RANDOM LEXICON EVALUATION // SELECT THE CORRECT ANSWER
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                  Ruang Uji Ingatan Kosakata
+                <h1
+                  id="quiz-setup-title"
+                  className="text-2xl sm:text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]"
+                >
+                  Vocabulary Recall Room
                 </h1>
                 <p className="text-xs sm:text-sm text-umber dark:text-[#B8AFA6] max-w-xl">
-                  Tentukan jumlah kartu acak yang ingin ditarik dari{" "}
+                  Choose how many random cards to draw from the{" "}
                   <span className="font-semibold text-espresso dark:text-[#EAE4DC]">
-                    {savedWords.length} arsip
+                    {savedWords.length} archived entries
                   </span>{" "}
-                  di Laci Katalog Anda, lalu pilih terjemahan kontekstual yang paling tepat.
+                  in your Catalog Drawer, then select the most accurate contextual translation.
                 </p>
               </div>
               <SleepingBookCapybara className="w-28 h-28 shrink-0" />
@@ -2924,7 +2727,7 @@
                 htmlFor="archival-quiz-count"
                 className="block font-mono text-xs uppercase tracking-wider text-umber dark:text-[#B8AFA6]"
               >
-                Jumlah Kartu Acak yang Diujikan (1 – {savedWords.length})
+                Number of Random Cards to Test (1 – {savedWords.length})
               </label>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -2936,6 +2739,7 @@
                       setQuizWordCount((prev) => Math.max(1, (Number(prev) || 1) - 1));
                     }}
                     disabled={quizWordCount <= 1}
+                    aria-label="Decrease the number of quiz cards"
                     className="btn-tactile w-8 h-8 rounded-lg bg-parchment dark:bg-nightCard disabled:opacity-35 text-espresso dark:text-[#F5F2EB] font-mono text-sm flex items-center justify-center border border-stoneDesk dark:border-nightBorder"
                   >
                     -
@@ -2971,14 +2775,15 @@
                       );
                     }}
                     disabled={quizWordCount >= savedWords.length}
+                    aria-label="Increase the number of quiz cards"
                     className="btn-tactile w-8 h-8 rounded-lg bg-parchment dark:bg-nightCard disabled:opacity-35 text-espresso dark:text-[#F5F2EB] font-mono text-sm flex items-center justify-center border border-stoneDesk dark:border-nightBorder"
                   >
                     +
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-mono text-xs text-umber dark:text-[#A59C94] mr-1">
+                <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Preset quiz card counts">
+                  <span className="font-mono text-xs text-umber dark:text-[#A59C94] mr-1" aria-hidden="true">
                     Preset:
                   </span>
                   {presetCounts.map((val) => {
@@ -2991,13 +2796,15 @@
                           ArchivalAudio.playKeyClick(soundEnabled);
                           setQuizWordCount(val);
                         }}
+                        aria-pressed={active}
+                        aria-label={val === savedWords.length ? `All ${val} cards` : `${val} cards`}
                         className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-mono border ${
                           active
                             ? "bg-espresso text-parchment border-espresso dark:bg-[#EAE4DC] dark:text-espresso"
                             : "bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border-stoneDesk dark:border-nightBorder"
                         }`}
                       >
-                        {val === savedWords.length ? `Semua (${val})` : `${val} Kartu`}
+                        {val === savedWords.length ? `All (${val})` : `${val} Cards`}
                       </button>
                     );
                   })}
@@ -3011,7 +2818,7 @@
                 onClick={() => onNavigate("dictionary")}
                 className="text-xs font-medium text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white"
               >
-                ← Kembali ke Laci Katalog
+                ← Back to Catalog Drawer
               </button>
 
               <button
@@ -3019,22 +2826,32 @@
                 onClick={() => handleStartQuiz()}
                 className="btn-tactile px-6 py-2.5 rounded-lg bg-espresso hover:bg-[#36302D] dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs"
               >
-                Mulai Evaluasi ({Math.min(Math.max(1, Number(quizWordCount) || 1), savedWords.length)} Soal Acak) →
+                Start Evaluation ({Math.min(Math.max(1, Number(quizWordCount) || 1), savedWords.length)} Random Questions) →
               </button>
             </div>
-          </div>
+          </section>
         );
       }
 
       if (quizState === "active" && currentQuestion) {
         const tier = getLexiconTier(currentQuestion.word, currentQuestion.partOfSpeech);
+        const readerMood =
+          selectedOption === null
+            ? "idle"
+            : selectedOption === currentQuestion.correctAnswer
+              ? "correct"
+              : "incorrect";
 
         return (
-          <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide">
+          <section
+            className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide"
+            aria-labelledby="quiz-question-title"
+          >
+            <h1 className="visually-hidden">Recall Quiz</h1>
             <div className="space-y-2">
               <div className="flex items-center justify-between font-mono text-xs text-umber dark:text-[#B8AFA6]">
                 <span>
-                  SPESIMEN {String(currentQuestionIndex + 1).padStart(2, "0")} DARI{" "}
+                  SPECIMEN {String(currentQuestionIndex + 1).padStart(2, "0")} OF{" "}
                   {String(quizQuestions.length).padStart(2, "0")}
                 </span>
                 <button
@@ -3042,10 +2859,18 @@
                   onClick={handleResetSetup}
                   className="hover:text-terracotta underline"
                 >
-                  Ubah Jumlah / Batalkan
+                  Change Count / Cancel
                 </button>
               </div>
-              <div className="w-full h-1.5 bg-linen dark:bg-nightDesk rounded-full overflow-hidden">
+              <div
+                className="w-full h-1.5 bg-linen dark:bg-nightDesk rounded-full overflow-hidden"
+                role="progressbar"
+                aria-label="Quiz progress"
+                aria-valuemin={0}
+                aria-valuemax={quizQuestions.length}
+                aria-valuenow={currentQuestionIndex + 1}
+                aria-valuetext={`Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`}
+              >
                 <div
                   className="h-full bg-sage transition-all duration-300"
                   style={{
@@ -3066,19 +2891,23 @@
                 </div>
 
                 <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap">
-                  <h2 className="text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
+                  <h2
+                    id="quiz-question-title"
+                    className="text-3xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]"
+                  >
                     {currentQuestion.word}
                   </h2>
                   {currentQuestion.phonetic && (
-                    <span className="font-mono text-sm text-brass dark:text-[#C8A97E]">
+                    <span className="font-mono text-sm text-brass-ink dark:text-[#C8A97E]">
                       {currentQuestion.phonetic}
                     </span>
                   )}
                   <button
                     type="button"
                     onClick={() => onPronounce(currentQuestion.word)}
-                    className="btn-tactile w-8 h-8 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
-                    title="Lafalkan kata"
+                    className="btn-tactile w-11 h-11 rounded-full bg-sageLight dark:bg-[#253127] text-espresso dark:text-[#D5E3D7] border border-sage/40 flex items-center justify-center"
+                    title="Pronounce word"
+                    aria-label={`Pronounce ${currentQuestion.word} in US English`}
                   >
                     <Icons.Speaker className="w-4 h-4" />
                   </button>
@@ -3086,16 +2915,20 @@
 
                 {currentQuestion.definition && (
                   <p className="text-xs text-umber dark:text-[#B8AFA6] max-w-lg leading-relaxed">
-                    Definisi konteks: "{currentQuestion.definition}"
+                    Contextual definition: "{currentQuestion.definition}"
                   </p>
                 )}
               </div>
 
-              <ReadingBookCapybara className="w-24 h-24 shrink-0" />
+              <ReadingBookCapybara className="w-32 h-32 shrink-0" mood={readerMood} />
             </div>
 
             {/* 4 Multiple Choice Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              role="group"
+              aria-labelledby="quiz-question-title"
+            >
               {currentQuestion.options.map((option, idx) => {
                 const optionLetter = String.fromCharCode(65 + idx);
                 const isAnswered = selectedOption !== null;
@@ -3127,10 +2960,13 @@
                     className={`btn-tactile p-4 rounded-xl border-2 text-left flex items-center justify-between gap-3 ${btnStyle}`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="w-7 h-7 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-xs font-semibold flex items-center justify-center shrink-0">
+                      <span
+                        className="w-7 h-7 rounded bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder font-mono text-xs font-semibold flex items-center justify-center shrink-0"
+                        aria-hidden="true"
+                      >
                         {optionLetter}
                       </span>
-                      <span className="text-sm font-medium">{option}</span>
+                      <span lang="id" className="text-sm font-medium">{option}</span>
                     </div>
                     {isAnswered && isCorrectOption && (
                       <Icons.Check className="w-4 h-4 text-sage shrink-0" />
@@ -3141,16 +2977,20 @@
             </div>
 
             {selectedOption !== null && (
-              <div className="p-4 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div
+                className="p-4 rounded-xl bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                role="status"
+                aria-live="polite"
+              >
                 <div className="space-y-0.5">
                   <div className="font-mono text-xs font-semibold text-espresso dark:text-[#EAE4DC]">
                     {selectedOption === currentQuestion.correctAnswer
-                      ? "✓ JAWABAN TEPAT"
-                      : `✕ KURANG TEPAT — ARTI SEBENARNYA: "${currentQuestion.correctAnswer}"`}
+                      ? "✓ CORRECT ANSWER"
+                      : `✕ NOT QUITE — CORRECT MEANING: "${currentQuestion.correctAnswer}"`}
                   </div>
                   {currentQuestion.example?.en && (
                     <p className="text-xs text-umber dark:text-[#B8AFA6] italic">
-                      Contoh: "{currentQuestion.example.en}"
+                      Example: "{currentQuestion.example.en}"
                     </p>
                   )}
                 </div>
@@ -3161,30 +3001,40 @@
                   className="btn-tactile px-5 py-2.5 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso font-medium text-xs shrink-0"
                 >
                   {currentQuestionIndex + 1 < quizQuestions.length
-                    ? "Spesimen Berikutnya →"
-                    : "Lihat Hasil Evaluasi →"}
+                    ? "Next Specimen →"
+                    : "View Evaluation Results →"}
                 </button>
               </div>
             )}
-          </div>
+          </section>
         );
       }
 
       /* SUMMARY CARD */
       return (
-        <div className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide">
+        <section
+          className="bg-parchment dark:bg-nightCard rounded-2xl p-6 sm:p-8 border border-stoneDesk dark:border-nightBorder shadow-archival space-y-6 animate-fade-slide"
+          aria-labelledby="quiz-summary-title"
+        >
+          <h1 className="visually-hidden">Recall Quiz</h1>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 border-b border-stoneDesk dark:border-nightBorder">
             <div className="flex items-center gap-4">
-              <ReadingBookCapybara className="w-24 h-24 shrink-0" />
+              <ReadingBookCapybara
+                className="w-28 h-28 shrink-0"
+                mood={scorePercentage >= 70 ? "correct" : "incorrect"}
+              />
               <div className="space-y-1">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-sage dark:text-[#98B49E] font-semibold">
-                  LAPORAN EVALUASI SELESAI
+                  EVALUATION REPORT COMPLETE
                 </span>
-                <h2 className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]">
-                  Skor Akhir: {correctCount} / {quizQuestions.length} ({scorePercentage}%)
+                <h2
+                  id="quiz-summary-title"
+                  className="text-2xl font-serif-editorial font-semibold text-espresso dark:text-[#F5F2EB]"
+                >
+                  Final Score: {correctCount} / {quizQuestions.length} ({scorePercentage}%)
                 </h2>
                 <p className="text-xs text-umber dark:text-[#B8AFA6]">
-                  Rekapitulasi pengujian acak dari Laci Katalog Anda.
+                  A recap of the random test drawn from your Catalog Drawer.
                 </p>
               </div>
             </div>
@@ -3195,33 +3045,40 @@
                 onClick={() => handleStartQuiz(quizQuestions.length)}
                 className="btn-tactile px-4 py-2 rounded-lg bg-espresso dark:bg-[#EAE4DC] text-parchment dark:text-espresso text-xs font-medium"
               >
-                Ulangi ({quizQuestions.length} Kartu Acak)
+                Retry ({quizQuestions.length} Random Cards)
               </button>
               <button
                 type="button"
                 onClick={handleResetSetup}
                 className="btn-tactile px-4 py-2 rounded-lg bg-linen dark:bg-nightDesk border border-stoneDesk dark:border-nightBorder text-xs font-medium"
               >
-                Ubah Jumlah Soal
+                Change Question Count
               </button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-mono text-xs uppercase text-umber dark:text-[#A59C94]">
-              Rincian Jawaban:
+            <h3
+              id="quiz-answer-details-title"
+              className="font-mono text-xs uppercase text-umber dark:text-[#A59C94]"
+            >
+              Answer Details:
             </h3>
-            <div className="divide-y divide-stoneDesk dark:divide-nightBorder border border-stoneDesk dark:border-nightBorder rounded-xl overflow-hidden">
+            <ul
+              className="divide-y divide-stoneDesk dark:divide-nightBorder border border-stoneDesk dark:border-nightBorder rounded-xl overflow-hidden"
+              aria-labelledby="quiz-answer-details-title"
+            >
               {quizAnswers.map((item, idx) => (
-                <div
+                <li
                   key={`${item.question.id}-${idx}`}
                   className="p-4 bg-parchment dark:bg-nightCard flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-brass">
+                      <span className="font-mono text-xs text-brass-ink" aria-hidden="true">
                         {String(idx + 1).padStart(2, "0")}.
                       </span>
+                      <span className="visually-hidden">Question {idx + 1}:</span>
                       <span className="font-serif-editorial font-semibold text-base text-espresso dark:text-[#F5F2EB]">
                         {item.question.word}
                       </span>
@@ -3230,8 +3087,8 @@
                       </span>
                     </div>
                     <p className="text-xs text-umber dark:text-[#B8AFA6] pl-6">
-                      Arti tepat:{" "}
-                      <span className="font-medium text-espresso dark:text-[#EAE4DC]">
+                      Correct meaning:{" "}
+                      <span lang="id" className="font-medium text-espresso dark:text-[#EAE4DC]">
                         {item.question.correctAnswer}
                       </span>
                     </p>
@@ -3240,27 +3097,127 @@
                   <div className="pl-6 sm:pl-0">
                     {item.isCorrect ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono bg-sageLight dark:bg-[#222D24] text-espresso dark:text-[#BBD0BF] border border-sage/40">
-                        ✓ {item.selected}
+                        <span aria-hidden="true">✓</span>
+                        <span className="visually-hidden">Your correct answer:</span>
+                        <span lang="id">{item.selected}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono bg-[#F4E6E3] dark:bg-[#32211E] text-terracotta dark:text-[#E5B8AD] border border-terracotta/40">
-                        ✕ {item.selected}
+                        <span aria-hidden="true">✕</span>
+                        <span className="visually-hidden">Your incorrect answer:</span>
+                        <span lang="id">{item.selected}</span>
                       </span>
                     )}
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
-        </div>
+        </section>
       );
     }
 
     // ============================================================================
-    // 10. MAIN APP COMPONENT
+    // 10. PRIMARY NAVIGATION — HEADER TABS + MOBILE THUMB BAR
+    // ============================================================================
+    function PrimaryNavigation({ items, activePage, onNavigate, variant = "header" }) {
+      const navIcons = {
+        translator: Icons.Search,
+        dictionary: Icons.Bookmark,
+        quiz: Icons.Check
+      };
+
+      if (variant === "bottom") {
+        return (
+          <nav className="wl-bottom-nav" aria-label="Primary">
+            {items.map((item) => {
+              const isActive = activePage === item.id;
+              const Icon = navIcons[item.id] || Icons.Search;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onNavigate(item.id)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`wl-bottom-nav__item ${isActive ? "is-active" : ""}`}
+                >
+                  <span className="relative" aria-hidden="true">
+                    <Icon className="w-5 h-5" />
+                    {typeof item.badge === "number" && (
+                      <span className="wl-bottom-nav__badge">{item.badge}</span>
+                    )}
+                  </span>
+                  <span>{item.label}</span>
+                  {typeof item.badge === "number" && (
+                    <span className="sr-only">, {item.badge} archived cards</span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        );
+      }
+
+      return (
+        <nav
+          className="hidden md:flex items-center gap-1 lg:gap-1.5 bg-linen/90 dark:bg-nightDesk p-1 rounded-xl border border-[#CFC7B8] dark:border-nightBorder"
+          aria-label="Primary"
+        >
+          {items.map((item) => {
+            const isActive = activePage === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onNavigate(item.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`btn-tactile min-h-11 px-2.5 lg:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all flex items-center gap-1 sm:gap-1.5 whitespace-nowrap ${
+                  isActive
+                    ? "bg-espresso text-parchment dark:bg-[#EAE4DC] dark:text-espresso shadow-sm"
+                    : "text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white"
+                }`}
+              >
+                <span className="hidden lg:inline font-mono text-[10px]">{item.code}.</span>
+                <span className="whitespace-nowrap">{item.label}</span>
+                {typeof item.badge === "number" && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${
+                      isActive
+                        ? "bg-parchment/20 text-parchment dark:bg-espresso/15 dark:text-espresso"
+                        : "bg-stoneDesk dark:bg-nightCard text-espresso dark:text-[#D9C7B0]"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {item.badge}
+                  </span>
+                )}
+                {typeof item.badge === "number" && (
+                  <span className="sr-only">archived cards</span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      );
+    }
+
+    // ============================================================================
+    // 11. MAIN APP COMPONENT
     // ============================================================================
     function App() {
       const [activePage, setActivePage] = useState("translator"); // "translator" | "dictionary" | "quiz"
+
+      // Each tab behaves like a new desk page; start at the masthead.
+      useEffect(() => {
+        if (typeof window !== "undefined") {
+          const rootEl = document.documentElement;
+          const previousBehavior = rootEl.style.scrollBehavior;
+          rootEl.style.scrollBehavior = "auto";
+          window.scrollTo(0, 0);
+          rootEl.style.scrollBehavior = previousBehavior;
+        }
+      }, [activePage]);
 
       const [darkMode, setDarkMode] = useState(() => {
         const savedTheme = SafeStorage.get("wordlens_theme", null);
@@ -3415,7 +3372,7 @@
       const handleClearHistory = () => {
         ArchivalAudio.playKeyClick(soundEnabled);
         setSearchHistory([]);
-        showToast("Riwayat penelusuran telah dibersihkan.", "LOG");
+        showToast("Search history cleared.", "LOG");
       };
 
       const isMeaningSaved = useCallback(
@@ -3432,7 +3389,6 @@
 
         if (exists) {
           ArchivalAudio.playKeyClick(soundEnabled);
-          showToast(`Entri "${word}" (${meaningObj.translation}) sudah tercatat di katalog.`, "INFO");
           return;
         }
 
@@ -3457,16 +3413,12 @@
         setTimeout(() => setMascotState("idle"), 1200);
 
         ArchivalAudio.playBellChord(soundEnabled);
-        showToast(
-          `Kartu "${word}" → "${meaningObj.translation}" berhasil diarsipkan ke Laci Katalog.`,
-          "STAMP"
-        );
       };
 
       const handleDeleteWord = (id, wordLabel) => {
         ArchivalAudio.playKeyClick(soundEnabled);
         setSavedWords((prev) => prev.filter((item) => item.id !== id));
-        showToast(`Kartu "${wordLabel}" dikeluarkan dari Laci Katalog.`, "DEL");
+        showToast(`Card "${wordLabel}" was removed from the Catalog Drawer.`, "DEL");
       };
 
       const handleLoadStarterWords = () => {
@@ -3514,10 +3466,10 @@
         if (addedCount > 0) {
           ArchivalAudio.playBellChord(soundEnabled);
           setSavedWords((prev) => [...newEntries, ...prev]);
-          showToast(`${addedCount} kartu spesimen berhasil ditambahkan ke Laci Katalog.`, "CAT");
+          showToast(`${addedCount} specimen cards added to the Catalog Drawer.`, "CAT");
         } else {
           ArchivalAudio.playKeyClick(soundEnabled);
-          showToast("Seluruh kartu spesimen contoh sudah ada di Laci Katalog.", "INFO");
+          showToast("All specimen cards are already in the Catalog Drawer.", "INFO");
         }
       };
 
@@ -3525,7 +3477,7 @@
         (textToSpeak) => {
           ArchivalAudio.playKeyClick(soundEnabled);
           if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-            showToast(`Melafalkan: "${textToSpeak}" (en-US)`, "AUDIO");
+            showToast(`Pronouncing: "${textToSpeak}" (en-US)`, "AUDIO");
             return;
           }
 
@@ -3542,7 +3494,7 @@
             window.speechSynthesis.speak(utterance);
           } catch (err) {
             setIsSpeaking(false);
-            showToast(`Melafalkan "${textToSpeak}"`, "AUDIO");
+            showToast(`Pronouncing "${textToSpeak}"`, "AUDIO");
           }
         },
         [showToast, soundEnabled]
@@ -3550,39 +3502,37 @@
 
       const handleGreetArchivist = () => {
         ArchivalAudio.playBellChord(soundEnabled);
-        setMascotState("celebrating");
+        setMascotState("greeting");
         setTimeout(() => setMascotState("idle"), 1100);
-        showToast(
-          "Kapi merapikan kacamata bacanya dan menyeruput kopi hangat. Selamat menelaah kosakata.",
-          "KAPI"
-        );
       };
 
       const navItems = [
-        { id: "translator", label: "Meja Leksikon", code: "01" },
-        { id: "dictionary", label: "Laci Katalog", code: "02", badge: savedWords.length },
-        { id: "quiz", label: "Uji Ingatan", code: "03" }
+        { id: "translator", label: "Lexicon Desk", code: "01" },
+        { id: "dictionary", label: "Catalog Drawer", code: "02", badge: savedWords.length },
+        { id: "quiz", label: "Recall Quiz", code: "03" }
       ];
 
+      const handlePageChange = (pageId) => {
+        ArchivalAudio.playKeyClick(soundEnabled);
+        setActivePage(pageId);
+      };
+
       return (
-        <div className="min-h-screen flex flex-col bg-linen dark:bg-nightDesk">
+        <div className="app-shell bg-linen dark:bg-nightDesk">
           {/* =================================================================== */}
           {/* ARCHIVAL HEADER WITH DISTINCT STONE/WALNUT SURFACE CONTRAST         */}
           {/* =================================================================== */}
           <header className="sticky top-0 z-40 backdrop-blur-md bg-[#E8E3D9]/95 dark:bg-[#1E1B18]/95 border-b-2 border-[#CFC7B8] dark:border-nightBorder transition-colors">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-1 sm:py-2.5 lg:py-3 flex items-center justify-between gap-2 sm:gap-3">
               {/* Brand Masthead with Scholarly Capybara Emblem (No Oranges) */}
               <button
                 type="button"
-                onClick={() => {
-                  ArchivalAudio.playKeyClick(soundEnabled);
-                  setActivePage("translator");
-                }}
-                className="btn-tactile flex items-center gap-3 text-left focus:outline-none"
+                onClick={() => handlePageChange("translator")}
+                className="btn-tactile flex min-w-0 items-center gap-2.5 sm:gap-3 text-left focus:outline-none"
               >
-                <div className="w-11 h-11 rounded-xl bg-[#F6F0E2] dark:bg-nightDesk border border-espresso/30 dark:border-brass/50 flex items-center justify-center shadow-sm overflow-hidden">
+                <span className="w-11 h-11 rounded-xl bg-[#F6F0E2] dark:bg-nightDesk border border-espresso/30 dark:border-brass/50 flex items-center justify-center shadow-sm overflow-hidden">
                   {/* Gambar 1: Minimalist Capybara Soaking in Water Ripples Logo */}
-                  <svg viewBox="0 0 64 52" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg aria-hidden="true" focusable="false" viewBox="0 0 64 52" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
                     {/* Capybara Silhouette Facing Left */}
                     <path
                       d="M15 20 C15 16.5 18 15 21.5 14 L27 12.5 C27 9.5 29.5 9.5 30 12 C31 10 33.5 10.5 33 13.5 C34.5 16 36.5 20 39 21.5 C45 22.5 49 25.5 50 32.5 C42 35.5 28 35.5 22.5 32.5 L21.5 27.5 L17.5 26.5 C15.2 26 14.5 23.5 15 20 Z"
@@ -3635,71 +3585,49 @@
                       strokeLinecap="round"
                     />
                   </svg>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
+                </span>
+                <span className="block">
+                  <span className="flex items-center gap-2">
                     <span className="text-lg font-serif-editorial font-bold tracking-tight text-espresso dark:text-[#F5F2EB]">
                       WordLens
                     </span>
-                    <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-parchment dark:bg-nightDesk font-mono text-[10px] text-umber dark:text-[#C8A97E] border border-stoneDesk dark:border-nightBorder">
+                    <span className="hidden lg:inline-block px-2 py-0.5 rounded bg-parchment dark:bg-nightDesk font-mono text-[10px] text-umber dark:text-[#C8A97E] border border-stoneDesk dark:border-nightBorder">
                       CAPYBARA ARCHIVE
                     </span>
-                  </div>
-                  <p className="text-[11px] text-umber dark:text-[#A59C94] -mt-0.5">
-                    Monograf Kosakata & Katalog Indeks
-                  </p>
-                </div>
+                  </span>
+                  <span className="hidden lg:block text-[11px] text-umber dark:text-[#A59C94] -mt-0.5">
+                    Vocabulary Monographs &amp; Index Catalog
+                  </span>
+                </span>
+                <span className="sr-only">— go to the Lexicon Desk</span>
               </button>
 
-              {/* Center Navigation Tabs */}
-              <nav className="flex items-center gap-1.5 bg-linen/90 dark:bg-nightDesk p-1 rounded-xl border border-[#CFC7B8] dark:border-nightBorder order-3 md:order-2 w-full md:w-auto justify-center">
-                {navItems.map((item) => {
-                  const isActive = activePage === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        ArchivalAudio.playKeyClick(soundEnabled);
-                        setActivePage(item.id);
-                      }}
-                      className={`btn-tactile px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                        isActive
-                          ? "bg-espresso text-parchment dark:bg-[#EAE4DC] dark:text-espresso shadow-sm"
-                          : "text-umber dark:text-[#B8AFA6] hover:text-espresso dark:hover:text-white"
-                      }`}
-                    >
-                      <span className="font-mono text-[10px] opacity-65">{item.code}.</span>
-                      <span>{item.label}</span>
-                      {typeof item.badge === "number" && (
-                        <span
-                          className={`px-1.5 py-0.2 rounded font-mono text-[10px] ${
-                            isActive
-                              ? "bg-parchment/20 text-parchment dark:bg-espresso/15 dark:text-espresso"
-                              : "bg-stoneDesk dark:bg-nightCard text-espresso dark:text-[#D9C7B0]"
-                          }`}
-                        >
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
+              {/* Desktop/tablet navigation. Phones use the fixed thumb bar below. */}
+              <PrimaryNavigation
+                items={navItems}
+                activePage={activePage}
+                onNavigate={handlePageChange}
+                variant="header"
+              />
 
-              {/* Right Controls: Audio Toggle & Lampu Baca (Dark Mode) */}
-              <div className="flex items-center gap-2 order-2 md:order-3">
+              {/* Right Controls: Audio Toggle & Reading Lamp (Dark Mode) */}
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => setSoundEnabled((prev) => !prev)}
-                  className={`btn-tactile px-2.5 py-1.5 rounded-lg border font-mono text-[11px] flex items-center gap-1.5 ${
+                  aria-pressed={soundEnabled}
+                  aria-label={`${soundEnabled ? "Sound On" : "Muted"}: typewriter and desk bell sounds ${
+                    soundEnabled ? "on" : "off"
+                  }. Activate to turn ${soundEnabled ? "off" : "on"}.`}
+                  className={`btn-tactile w-11 h-11 lg:w-auto lg:h-auto lg:px-2.5 lg:py-1.5 rounded-lg border font-mono text-[11px] inline-flex items-center justify-center gap-1.5 ${
                     soundEnabled
                       ? "bg-parchment dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] border-[#B5AC99] dark:border-nightBorder"
-                      : "bg-linen/50 dark:bg-nightDesk/50 text-umber/50 border-stoneDesk dark:border-nightBorder"
+                      : "bg-linen/50 dark:bg-nightDesk/50 text-umber border-stoneDesk dark:border-nightBorder"
                   }`}
-                  title={soundEnabled ? "Suara Ketikan & Lonceng Meja: Aktif" : "Suara: Nonaktif"}
+                  title={soundEnabled ? "Typewriter & desk bell sounds: on" : "Sound: off"}
                 >
-                  <span>{soundEnabled ? "♦ Suara Aktif" : "♢ Bisu"}</span>
+                  <Icons.Speaker className={`w-4 h-4 lg:w-3.5 lg:h-3.5 ${soundEnabled ? "" : "opacity-50"}`} />
+                  <span className="hidden lg:inline">{soundEnabled ? "Sound On" : "Muted"}</span>
                 </button>
 
                 <button
@@ -3708,15 +3636,25 @@
                     ArchivalAudio.playKeyClick(soundEnabled);
                     setDarkMode((prev) => !prev);
                   }}
-                  className="btn-tactile px-3 py-1.5 rounded-lg bg-parchment dark:bg-nightDesk border border-[#B5AC99] dark:border-nightBorder text-espresso dark:text-[#C8A97E] text-xs font-medium inline-flex items-center gap-1.5"
-                  title={darkMode ? "Beralih ke Kertas Terang" : "Beralih ke Mode Baca Malam"}
+                  aria-pressed={darkMode}
+                  aria-label={`Reading mode: ${darkMode ? "night" : "day"}. Activate to switch to ${darkMode ? "day" : "night"} mode.`}
+                  className="btn-tactile w-11 h-11 lg:w-auto lg:h-auto px-0 lg:px-3 lg:py-1.5 rounded-lg bg-parchment dark:bg-nightDesk border border-[#B5AC99] dark:border-nightBorder text-espresso dark:text-[#C8A97E] text-xs font-medium inline-flex items-center justify-center gap-1.5"
+                  title={darkMode ? "Switch to light paper mode" : "Switch to night reading mode"}
                 >
-                  {darkMode ? <Icons.Sun className="w-3.5 h-3.5" /> : <Icons.Moon className="w-3.5 h-3.5" />}
-                  <span className="hidden sm:inline">{darkMode ? "Siang" : "Malam"}</span>
+                  {darkMode ? <Icons.Sun className="w-4 h-4 lg:w-3.5 lg:h-3.5" /> : <Icons.Moon className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}
+                  <span className="hidden lg:inline" aria-hidden="true">{darkMode ? "Day" : "Night"}</span>
                 </button>
               </div>
             </div>
           </header>
+
+          {/* Mobile-only, thumb-friendly primary navigation */}
+          <PrimaryNavigation
+            items={navItems}
+            activePage={activePage}
+            onNavigate={handlePageChange}
+            variant="bottom"
+          />
 
           {/* =================================================================== */}
           {/* TOP-CENTER ARCHIVAL TOAST NOTIFICATION                              */}
@@ -3725,6 +3663,7 @@
             <div
               role="status"
               aria-live="polite"
+              aria-atomic="true"
               className="fixed top-20 inset-x-0 mx-auto z-50 max-w-md px-4 pointer-events-none"
             >
               <div className="pointer-events-auto px-4 py-3 rounded-xl shadow-index-card bg-espresso text-parchment dark:bg-[#EAE4DC] dark:text-espresso border border-brass text-xs font-medium flex items-center justify-between gap-3">
@@ -3738,7 +3677,7 @@
                   type="button"
                   onClick={() => setToast(null)}
                   className="opacity-70 hover:opacity-100 font-mono text-xs px-1"
-                  aria-label="Tutup pemberitahuan"
+                  aria-label="Dismiss notification"
                 >
                   ✕
                 </button>
@@ -3749,7 +3688,11 @@
           {/* =================================================================== */}
           {/* MAIN WORKSPACE CONTENT                                              */}
           {/* =================================================================== */}
-          <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-7">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="app-shell__main max-w-6xl w-full mx-auto px-4 sm:px-6 py-2.5 sm:py-6 lg:py-7"
+          >
             {activePage === "translator" && (
               <LexiconDeskView
                 query={translatorQuery}
@@ -3801,7 +3744,7 @@
           {/* =================================================================== */}
           {/* EDITORIAL FOOTER                                                    */}
           {/* =================================================================== */}
-          <footer className="mt-12 border-t border-stoneDesk dark:border-nightBorder py-6 text-xs text-umber dark:text-[#8C827A]">
+          <footer className="mt-8 sm:mt-12 border-t border-stoneDesk dark:border-nightBorder py-6 text-xs text-umber dark:text-[#8C827A]">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
               <span className="font-serif-editorial italic">
                 WordLens — The Capybara Archivist's Contextual Lexicon & Card Catalog
@@ -3817,6 +3760,3 @@
 
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(<App />);
-  </script>
-</body>
-</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WordLens capybara">
+  <rect width="64" height="64" rx="14" fill="#F6F0E2"/>
+  <ellipse cx="32" cy="48" rx="21" ry="4.5" fill="#D4DCFF" opacity="0.75"/>
+  <path d="M17 28C17 23.5 21 21.5 26 20.5L32 18.5C32 14.8 35.3 14.8 36 18C37.4 15.6 40.6 16.2 40 20C42 23.5 44.5 28.5 48 30.5C55.5 32 60.5 35.8 61.8 44.7C52 48.5 34.5 48.5 27.5 44.7L26.3 38L21.3 36.7C18.4 36 17.4 33 17 28Z" fill="#3D2314"/>
+  <path d="M30.5 24 L36.2 26" stroke="#F6F0E2" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M23 42C18 44.2 20.4 49.2 33 50" stroke="#3D2314" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+  <path d="M59 42C64 44.2 61.2 49.2 47 50" stroke="#3D2314" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+  <path d="M19 48.6C22.5 51.4 28 52.6 32 53.2" stroke="#3D2314" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+  <path d="M38 53.2C42 52.6 47.5 51.4 51 48.6" stroke="#3D2314" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+</svg>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="WordLens is a contextual English–Indonesian lexicon and library index-card catalog. Explore how words change meaning, archive vocabulary cards, and test your recall with Kapi the Librarian." />
+  <meta name="theme-color" content="#F5F2EB" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#151311" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
+  <title>WordLens — Contextual Lexicon &amp; Capybara Library Catalog</title>
+
+  <!-- Google Fonts: Newsreader (editorial serif), Plus Jakarta Sans (UI), JetBrains Mono (catalog metadata) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Site stylesheet: design tokens, layout primitives and editorial effects -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Tailwind CSS CDN + shared configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind.config.js"></script>
+
+  <!-- React 18 (global production builds) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- Application script, precompiled from js/app.jsx -->
+  <script defer src="js/app.js"></script>
+</head>
+
+<body class="bg-linen dark:bg-nightDesk text-espresso dark:text-[#EAE4DC] antialiased transition-colors duration-300 min-h-screen selection:bg-sage selection:text-white">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div id="root">
+    <div class="app-loading" role="status">Opening the WordLens archive…</div>
+  </div>
+
+  <noscript>
+    <p class="noscript-message">
+      WordLens is an interactive lexical archive and needs JavaScript enabled. Please enable JavaScript in your browser to browse the catalog.
+    </p>
+  </noscript>
+</body>
+</html>

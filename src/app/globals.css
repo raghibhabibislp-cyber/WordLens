@@ -1,0 +1,39 @@
+@layer theme, base, components, legacy, utilities;
+
+@import "tailwindcss";
+@import "../styles/legacy.css" layer(legacy);
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-linen: rgb(var(--wl-linen-rgb));
+  --color-parchment: rgb(var(--wl-parchment-rgb));
+  --color-stoneDesk: rgb(var(--wl-stone-desk-rgb));
+  --color-espresso: rgb(var(--wl-espresso-rgb));
+  --color-umber: rgb(var(--wl-umber-rgb));
+  --color-sage: rgb(var(--wl-sage-rgb));
+  --color-sageLight: rgb(var(--wl-sage-light-rgb));
+  --color-riverSlate: rgb(var(--wl-river-slate-rgb));
+  --color-slateLight: rgb(var(--wl-slate-light-rgb));
+  --color-terracotta: rgb(var(--wl-terracotta-rgb));
+  --color-brass: rgb(var(--wl-brass-rgb));
+  --color-nightDesk: rgb(var(--wl-night-desk-rgb));
+  --color-nightCard: rgb(var(--wl-night-card-rgb));
+  --color-nightBorder: rgb(var(--wl-night-border-rgb));
+
+  --font-serif: var(--wl-font-serif);
+  --font-sans: var(--wl-font-sans);
+  --font-mono: var(--wl-font-mono);
+
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+
+  --shadow-archival: var(--wl-shadow-archival);
+  --shadow-index-card: var(--wl-shadow-index-card);
+  --shadow-tactile: var(--wl-shadow-tactile);
+}

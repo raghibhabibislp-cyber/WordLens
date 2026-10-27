@@ -1,0 +1,889 @@
+/* ==========================================================================
+   WordLens — Global stylesheet
+   Design tokens, base styles, editorial effects, and responsive layout.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Design tokens (CSS custom properties)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Core archival palette (RGB channels keep Tailwind opacity utilities working) */
+  --wl-linen-rgb: 245 242 235;
+  --wl-parchment-rgb: 252 251 247;
+  --wl-stone-desk-rgb: 232 227 217;
+  --wl-espresso-rgb: 34 30 28;
+  --wl-umber-rgb: 96 88 81;
+  --wl-sage-rgb: 74 93 78;
+  --wl-sage-light-rgb: 228 236 229;
+  --wl-river-slate-rgb: 71 88 99;
+  --wl-slate-light-rgb: 227 234 239;
+  --wl-terracotta-rgb: 143 83 67;
+  --wl-brass-rgb: 158 123 79;
+  --wl-brass-ink-rgb: 122 92 53;
+  --wl-night-desk-rgb: 21 19 17;
+  --wl-night-card-rgb: 30 27 24;
+  --wl-night-border-rgb: 49 44 39;
+
+  /* Semantic tokens */
+  --wl-page-bg: var(--wl-linen-rgb);
+  --wl-page-fg: var(--wl-espresso-rgb);
+  --wl-focus-ring: var(--wl-sage-rgb);
+  --wl-selection-bg: var(--wl-sage-rgb);
+  --wl-selection-fg: 255 255 255;
+
+  /* Typography */
+  --wl-font-serif: "Newsreader", Georgia, Cambria, "Times New Roman", serif;
+  --wl-font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Spacing, radii, shadows and motion */
+  --wl-space-1: 0.25rem;
+  --wl-space-2: 0.5rem;
+  --wl-space-3: 0.75rem;
+  --wl-space-4: 1rem;
+  --wl-space-5: 1.25rem;
+  --wl-space-6: 1.5rem;
+  --wl-radius-card: 14px;
+  --wl-radius-panel: 1rem;
+  --wl-shadow-archival: 0 4px 20px -2px rgba(34, 30, 28, 0.06),
+    0 1px 4px -1px rgba(34, 30, 28, 0.04);
+  --wl-shadow-index-card: 0 8px 24px -4px rgba(34, 30, 28, 0.08),
+    0 2px 6px -1px rgba(34, 30, 28, 0.05);
+  --wl-shadow-tactile: 0 2px 0 0 #221e1c;
+  --wl-transition-tactile: transform 0.16s ease, box-shadow 0.16s ease,
+    background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.dark {
+  color-scheme: dark;
+  --wl-page-bg: var(--wl-night-desk-rgb);
+  --wl-page-fg: 234 228 220;
+  --wl-focus-ring: 200 169 126;
+}
+
+/* --------------------------------------------------------------------------
+   2. Base and accessibility helpers
+   -------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--wl-font-sans);
+  background-color: rgb(var(--wl-page-bg));
+  color: rgb(var(--wl-page-fg));
+  overflow-x: hidden;
+  /* `clip` avoids creating a scroll container that can break sticky panels. */
+  overflow-x: clip;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid rgb(var(--wl-focus-ring));
+  outline-offset: 3px;
+}
+
+::selection {
+  background-color: rgb(var(--wl-selection-bg));
+  color: rgb(var(--wl-selection-fg));
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Keyboard-first shortcut to the main workspace */
+.skip-link {
+  position: fixed;
+  top: var(--wl-space-3);
+  left: var(--wl-space-3);
+  z-index: 100;
+  padding: 0.65rem 1rem;
+  border: 2px solid rgb(var(--wl-espresso-rgb));
+  border-radius: 0.5rem;
+  background-color: rgb(var(--wl-parchment-rgb));
+  color: rgb(var(--wl-espresso-rgb));
+  font-family: var(--wl-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transform: translateY(-200%);
+  transition: transform 0.16s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Application shell: sticky footer without a fixed height */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.app-shell__main {
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   3. Typography
+   -------------------------------------------------------------------------- */
+.font-serif-editorial {
+  font-family: var(--wl-font-serif);
+}
+
+/* --------------------------------------------------------------------------
+   4. Tactile controls
+   -------------------------------------------------------------------------- */
+.btn-tactile {
+  transition: var(--wl-transition-tactile);
+}
+
+.btn-tactile:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-tactile:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* --------------------------------------------------------------------------
+   5. Library index cards — 3D flip
+   -------------------------------------------------------------------------- */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--wl-radius-card);
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Ruled lines for an authentic library index card feel */
+.ruled-card-bg {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 27px,
+    rgba(158, 123, 79, 0.12) 28px
+  );
+}
+
+.dark .ruled-card-bg {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 27px,
+    rgba(200, 169, 126, 0.08) 28px
+  );
+}
+
+/* --------------------------------------------------------------------------
+   6. Responsive layout primitives
+   -------------------------------------------------------------------------- */
+/* The two-column editorial desk: CSS Grid with a 12-column canvas. */
+.desk-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wl-space-5);
+  align-items: start;
+}
+
+.desk-grid__inquiry,
+.desk-grid__monograph {
+  min-width: 0;
+}
+
+/* Tablet: place inquiry and monograph side by side instead of a long column. */
+@media (min-width: 768px) {
+  .desk-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--wl-space-5);
+  }
+
+  .desk-grid__inquiry {
+    grid-column: span 5;
+  }
+
+  .desk-grid__monograph {
+    grid-column: span 7;
+  }
+}
+
+/* Desktop: keep the inquiry panel in view while the monograph is read. */
+@media (min-width: 1024px) {
+  .desk-grid {
+    gap: var(--wl-space-6);
+  }
+
+  .desk-grid__inquiry {
+    position: sticky;
+    top: 5.25rem;
+    align-self: start;
+    max-height: calc(100vh - 5.25rem - var(--wl-space-4));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .desk-grid__monograph {
+    align-self: start;
+  }
+}
+
+/* Personal archive: one card per row on small screens, two from 768px up. */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wl-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Card deck keeps a horizontal scroll-snap rail while preserving the layout. */
+.card-rail {
+  display: flex;
+  align-items: center;
+  gap: var(--wl-space-4);
+  padding: var(--wl-space-1) var(--wl-space-1) var(--wl-space-3);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --------------------------------------------------------------------------
+   6b. Mobile thumb navigation
+   -------------------------------------------------------------------------- */
+.wl-bottom-nav {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 60;
+  display: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--wl-space-1);
+  padding: 0.5rem 0.65rem calc(0.5rem + env(safe-area-inset-bottom));
+  border-top: 1px solid rgb(var(--wl-stone-desk-rgb));
+  background-color: rgba(232, 227, 217, 0.97);
+  box-shadow: 0 -8px 24px -12px rgba(34, 30, 28, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.dark .wl-bottom-nav {
+  border-top-color: rgb(var(--wl-night-border-rgb));
+  background-color: rgba(30, 27, 24, 0.97);
+  box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.65);
+}
+
+.wl-bottom-nav__item {
+  position: relative;
+  display: flex;
+  min-height: 3.25rem;
+  min-width: 2.75rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  color: rgb(var(--wl-umber-rgb));
+  font-size: 0.66rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+  touch-action: manipulation;
+  transition: background-color 0.16s ease, border-color 0.16s ease,
+    color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.dark .wl-bottom-nav__item {
+  color: #b8afa6;
+}
+
+.wl-bottom-nav__item.is-active {
+  border-color: rgb(var(--wl-espresso-rgb));
+  background-color: rgb(var(--wl-espresso-rgb));
+  color: rgb(var(--wl-parchment-rgb));
+  box-shadow: var(--wl-shadow-tactile);
+}
+
+.dark .wl-bottom-nav__item.is-active {
+  border-color: #eae4dc;
+  background-color: #eae4dc;
+  color: #221e1c;
+}
+
+.wl-bottom-nav__badge {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.65rem;
+  display: inline-flex;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.2rem;
+  border-radius: 9999px;
+  background-color: rgb(var(--wl-sage-rgb));
+  color: #fff;
+  font-family: var(--wl-font-mono);
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+.wl-bottom-nav__item.is-active .wl-bottom-nav__badge {
+  background-color: rgb(var(--wl-brass-rgb));
+  color: #fff;
+}
+
+@media (max-width: 767px) {
+  .wl-bottom-nav {
+    display: grid;
+  }
+
+  /* Keep the footer and final controls clear of the fixed thumb bar. */
+  .app-shell {
+    padding-bottom: calc(4.6rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 768px) {
+  .wl-bottom-nav {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. Editorial loading state
+   -------------------------------------------------------------------------- */
+.app-loading {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: var(--wl-space-6);
+  color: rgb(var(--wl-umber-rgb));
+  font-family: var(--wl-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.noscript-message {
+  max-width: 40rem;
+  margin: 4rem auto;
+  padding: var(--wl-space-6);
+  border: 1px solid rgb(var(--wl-stone-desk-rgb));
+  border-radius: var(--wl-radius-panel);
+  background-color: rgb(var(--wl-parchment-rgb));
+  color: rgb(var(--wl-espresso-rgb));
+  font-family: var(--wl-font-sans);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   8. Animations
+   -------------------------------------------------------------------------- */
+@keyframes subtleSteam {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(-4px) translateX(2px);
+    opacity: 0.85;
+  }
+}
+
+@keyframes lensScan {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-3px, -2px) rotate(-5deg);
+  }
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes capyPlayfulIdle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+@keyframes orangeIdleBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3.5px) rotate(2deg);
+  }
+}
+
+@keyframes capyHappyJump {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  20% {
+    transform: translateY(3px) scale(1.06, 0.93);
+  }
+  45% {
+    transform: translateY(-14px) scale(0.96, 1.05) rotate(-2deg);
+  }
+  70% {
+    transform: translateY(2px) scale(1.03, 0.97);
+  }
+  85% {
+    transform: translateY(-4px) scale(0.99, 1.01);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes orangeHighBounce {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  20% {
+    transform: translateY(3px) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-28px) rotate(14deg) scale(1.08);
+  }
+  75% {
+    transform: translateY(1px) rotate(-6deg) scale(1.04, 0.92);
+  }
+  90% {
+    transform: translateY(-8px) rotate(4deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes zzzFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.animate-steam {
+  animation: subtleSteam 3.2s ease-in-out infinite;
+}
+
+.animate-lens-scan {
+  animation: lensScan 1.8s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+.animate-fade-slide {
+  animation: fadeSlide 0.25s ease-out forwards;
+}
+
+.animate-capy-idle {
+  animation: capyPlayfulIdle 2.6s ease-in-out infinite;
+}
+
+.animate-orange-idle {
+  animation: orangeIdleBob 2.6s ease-in-out infinite;
+}
+
+.animate-capy-jump {
+  animation: capyHappyJump 0.68s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-orange-jump {
+  animation: orangeHighBounce 0.68s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-zzz {
+  animation: zzzFloat 2.8s ease-in-out infinite;
+}
+
+/* Readable brass ink for small labels and metadata.
+   The decorative brass token is too light for body-sized text on paper. */
+.text-brass-ink {
+  color: rgb(var(--wl-brass-ink-rgb));
+}
+
+.dark .text-brass-ink {
+  color: #c8a97e;
+}
+
+/* --------------------------------------------------------------------------
+   8b. Reading capybara — recall room companion
+   The supplied artwork stays untouched; only its wrapper and overlays move.
+   -------------------------------------------------------------------------- */
+.capy-reader {
+  position: relative;
+  isolation: isolate;
+}
+
+.capy-reader__halo,
+.capy-reader__burst {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.capy-reader__halo {
+  inset: 5%;
+  background: radial-gradient(
+    circle at 50% 46%,
+    rgba(205, 173, 129, 0.3) 0%,
+    rgba(205, 173, 129, 0.13) 42%,
+    rgba(205, 173, 129, 0) 70%
+  );
+  opacity: 0.65;
+  transform: scale(0.94);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.dark .capy-reader__halo {
+  background: radial-gradient(
+    circle at 50% 46%,
+    rgba(200, 169, 126, 0.22) 0%,
+    rgba(200, 169, 126, 0.09) 42%,
+    rgba(200, 169, 126, 0) 70%
+  );
+}
+
+.capy-reader__burst {
+  inset: 2%;
+  background: radial-gradient(
+    circle,
+    rgba(200, 169, 126, 0.38) 0%,
+    rgba(200, 169, 126, 0.14) 40%,
+    rgba(200, 169, 126, 0) 68%
+  );
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.capy-reader__scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 88%;
+  will-change: transform;
+  z-index: 1;
+}
+
+.capy-reader__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 4px 5px rgba(34, 30, 28, 0.08));
+  transition: filter 0.3s ease;
+}
+
+.capy-reader__sparkles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform-origin: 50% 45%;
+  pointer-events: none;
+}
+
+.capy-reader__sweat {
+  position: absolute;
+  top: 11%;
+  right: 4%;
+  width: 12%;
+  height: auto;
+  opacity: 0;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.capy-reader.is-idle .capy-reader__scene {
+  animation: capyReaderFloat 5.2s ease-in-out infinite;
+}
+
+.capy-reader.is-idle .capy-reader__halo {
+  animation: capyReaderHaloPulse 5.2s ease-in-out infinite;
+}
+
+.capy-reader.is-correct .capy-reader__scene {
+  animation: capyReaderCheer 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.capy-reader.is-correct .capy-reader__halo {
+  animation: capyReaderCorrectGlow 1.1s ease-out both;
+}
+
+.capy-reader.is-correct .capy-reader__burst {
+  animation: capyReaderBurst 1s ease-out both;
+}
+
+.capy-reader.is-correct .capy-reader__sparkles {
+  animation: capyReaderSparkle 1.15s ease-out 0.05s both;
+}
+
+.capy-reader.is-incorrect .capy-reader__scene {
+  animation: capyReaderWince 0.85s ease-in-out both;
+}
+
+.capy-reader.is-incorrect .capy-reader__sweat {
+  animation: capyReaderSweat 1.35s ease-out 0.05s both;
+}
+
+.capy-reader:hover .capy-reader__image {
+  filter: drop-shadow(0 7px 9px rgba(34, 30, 28, 0.18));
+}
+
+.capy-reader:hover .capy-reader__halo {
+  opacity: 0.95;
+  transform: scale(1.03);
+}
+
+@keyframes capyReaderFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2.5px) rotate(-0.35deg);
+  }
+}
+
+@keyframes capyReaderHaloPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes capyReaderCheer {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  14% {
+    transform: translateY(2px) rotate(0deg) scale(1.025, 0.975);
+  }
+  38% {
+    transform: translateY(-8px) rotate(-2.2deg) scale(0.985, 1.02);
+  }
+  55% {
+    transform: translateY(0) rotate(1.4deg) scale(1.015, 0.985);
+  }
+  72% {
+    transform: translateY(-3px) rotate(-0.6deg) scale(1);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes capyReaderWince {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  12% {
+    transform: translateX(-3px) rotate(-1.3deg);
+  }
+  28% {
+    transform: translateX(3px) rotate(1.3deg);
+  }
+  44% {
+    transform: translateX(-2.5px) rotate(-1deg);
+  }
+  62% {
+    transform: translateX(2px) rotate(0.7deg);
+  }
+  80% {
+    transform: translateX(-0.8px) rotate(-0.25deg);
+  }
+}
+
+@keyframes capyReaderCorrectGlow {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+@keyframes capyReaderBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  25% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes capyReaderSparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.55) rotate(-6deg);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.04) rotate(0deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12) rotate(4deg);
+  }
+}
+
+@keyframes capyReaderSweat {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(2px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(9px) scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Scrollbars
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(96, 88, 81, 0.08);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(96, 88, 81, 0.28);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 88, 81, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   10. Reduced motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
